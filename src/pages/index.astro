@@ -1,176 +1,82 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SceneStage from '../components/SceneStage.astro';
-import { about, anime, board, coffee, contacts, games, moods, moments, photos, songs, site } from '../data/site';
-import { withBase } from '../lib/paths';
-
-const linkItems = contacts.links.filter((item) => item.href);
-const listSections = [
-  { id: 'songs', num: '02', title: '我的歌单', sub: 'Playlist', items: songs },
-  { id: 'anime', num: '03', title: '番剧', sub: 'Anime', items: anime },
-  { id: 'games', num: '04', title: '游戏', sub: 'Games', items: games },
-];
+import { contacts, playlist, site } from '../data/site';
 ---
 <BaseLayout>
   <SceneStage />
 
-  <section class="section" id="about" data-reveal>
+  <section class="section" id="songs" data-reveal>
     <div class="section__head">
       <div class="section__title-wrap">
         <span class="section__num">01</span>
-        <h2 class="section__title">关于我</h2>
+        <h2 class="section__title">我的歌单</h2>
       </div>
-      <span class="section__sub">About</span>
+      <span class="section__sub">Playlist</span>
     </div>
 
-    <div class="profile">
-      <img class="profile__avatar" src={about.avatar} alt={`${contacts.qqNickname} 的头像`} loading="lazy" />
-      <div class="profile__body">
-        {about.paragraphs.map((text) => <p>{text}</p>)}
-        <div class="link-chips">
-          {linkItems.map((item) => (
-            <a href={item.href} target="_blank" rel="noopener">{item.label}</a>
-          ))}
-          <a href={`mailto:${contacts.email}`}>邮件</a>
+    <div class="player" data-player>
+      <div class="player__now">
+        <span class="player__art" aria-hidden="true">♪</span>
+        <div class="player__meta">
+          <span class="player__title" data-player-title>选一首开始</span>
+          <span class="player__sub" data-player-sub>点下面的歌名播放</span>
         </div>
       </div>
-    </div>
-  </section>
 
-  {
-    listSections.map((section) => (
-      <section class="section" id={section.id} data-reveal>
-        <div class="section__head">
-          <div class="section__title-wrap">
-            <span class="section__num">{section.num}</span>
-            <h2 class="section__title">{section.title}</h2>
-          </div>
-          <span class="section__sub">{section.sub}</span>
+      <div class="player__controls">
+        <button class="player__btn" type="button" data-play-prev aria-label="上一首">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 5v14M18 5l-9 7 9 7V5Z" stroke-linejoin="round" /></svg>
+        </button>
+        <button class="player__btn player__btn--main" type="button" data-play-toggle aria-label="播放">
+          <svg class="player__icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5Z" /></svg>
+          <svg class="player__icon-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z" /></svg>
+        </button>
+        <button class="player__btn" type="button" data-play-next aria-label="下一首">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 5v14M6 5l9 7-9 7V5Z" stroke-linejoin="round" /></svg>
+        </button>
+      </div>
+
+      <div class="player__progress">
+        <span class="player__time" data-time-current>0:00</span>
+        <div class="player__bar" data-seek>
+          <span class="player__fill" data-progress></span>
         </div>
-        <ul class="list">
-          {section.items.map((item, index) => (
-            <li class="list__item">
-              <span class="list__idx">{String(index + 1).padStart(2, '0')}</span>
-              <div class="list__main">
-                <span class="list__name">{item.name}</span>
-                {'meta' in item && item.meta && <span class="list__meta">{item.meta}</span>}
-                {'artist' in item && item.artist && <span class="list__meta">{item.artist}</span>}
-              </div>
-              <span class="list__note">{item.note}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-    ))
-  }
-
-  <section class="section" id="moments" data-reveal>
-    <div class="section__head">
-      <div class="section__title-wrap">
-        <span class="section__num">05</span>
-        <h2 class="section__title">说说</h2>
+        <span class="player__time" data-time-total>0:00</span>
       </div>
-      <span class="section__sub">Moments</span>
     </div>
-    <ol class="timeline">
-      {
-        moments.map((item) => (
-          <li>
-            <span class="timeline__date">{item.date}</span>
-            <p class="timeline__text">{item.text}</p>
-          </li>
-        ))
-      }
-    </ol>
 
-    <div class="photo-strip">
+    <ul class="playlist">
       {
-        photos.map((photo) => (
-          <figure class="photo" data-zoom>
-            <img src={withBase(photo.src)} alt={photo.caption} loading="lazy" decoding="async" />
-            <figcaption>{photo.caption}</figcaption>
-          </figure>
-        ))
-      }
-    </div>
-  </section>
-
-  <section class="section" id="mood" data-reveal>
-    <div class="section__head">
-      <div class="section__title-wrap">
-        <span class="section__num">06</span>
-        <h2 class="section__title">心情</h2>
-      </div>
-      <span class="section__sub">Mood</span>
-    </div>
-    <div class="mood-grid">
-      {
-        moods.map((item) => (
-          <div class="mood-card">
-            <span class="mood-card__emoji">{item.mood}</span>
-            <p class="mood-card__text">{item.text}</p>
-            <span class="mood-card__date">{item.date}</span>
-          </div>
-        ))
-      }
-    </div>
-  </section>
-
-  <section class="section" id="coffee" data-reveal>
-    <div class="section__head">
-      <div class="section__title-wrap">
-        <span class="section__num">07</span>
-        <h2 class="section__title">咖啡</h2>
-      </div>
-      <span class="section__sub">Coffee</span>
-    </div>
-    <ul class="list">
-      {
-        coffee.map((item, index) => (
-          <li class="list__item">
-            <span class="list__idx">{String(index + 1).padStart(2, '0')}</span>
-            <div class="list__main">
-              <span class="list__name">{item.name}</span>
-              <span class="list__meta">{item.meta}</span>
-            </div>
-            <span class="list__note">{item.note}</span>
+        playlist.songs.map((song, index) => (
+          <li class="playlist__item" data-song data-index={index} data-id={song.id}>
+            <button type="button" class="playlist__button" data-play-song={index}>
+              <span class="playlist__idx">{String(index + 1).padStart(2, '0')}</span>
+              <span class="playlist__body">
+                <span class="playlist__name">{song.name}</span>
+                <span class="playlist__meta">{song.artist} · {song.album}</span>
+              </span>
+              <span class="playlist__state" data-state aria-hidden="true">▶</span>
+            </button>
           </li>
         ))
       }
     </ul>
-  </section>
 
-  <section class="section" id="board" data-reveal>
-    <div class="section__head">
-      <div class="section__title-wrap">
-        <span class="section__num">08</span>
-        <h2 class="section__title">留言板</h2>
-      </div>
-      <span class="section__sub">Board</span>
-    </div>
+    <p class="playlist__note">
+      歌单来自 <a href={playlist.source.href} target="_blank" rel="noopener">{playlist.source.label}</a>。{playlist.note}
+    </p>
 
-    <div class="contact-card">
-      <img class="contact-card__avatar" src={contacts.qqAvatar} alt={`${contacts.qqNickname} 的头像`} loading="lazy" />
-      <div>
-        <h3 class="contact-card__name">{contacts.qqNickname}</h3>
-        <p class="contact-card__line">{board.note}</p>
-        <p class="contact-card__qq">
-          QQ {contacts.qq}
-          <button class="copy-btn" type="button" data-copy={contacts.qq}>复制</button>
-        </p>
-        <div class="contact-card__links">
-          {linkItems.map((item) => (
-            <a href={item.href} target="_blank" rel="noopener">{item.label}</a>
-          ))}
-          <a href={`mailto:${contacts.email}`}>邮件</a>
-        </div>
-      </div>
-    </div>
+    <audio data-audio preload="none"></audio>
   </section>
 
   <footer class="footer">
     <p style="margin:0">© {new Date().getFullYear()} {site.name} · 在自己的小窝里</p>
     <p class="footer__jp" style="margin:0">あめのち、はれ。</p>
-    <button class="replay-btn" type="button" data-replay-intro>重看开场</button>
+    <div class="footer__links">
+      <a href={contacts.qqZone} target="_blank" rel="noopener">QQ 空间</a>
+      <a href={`mailto:${contacts.email}`}>邮件</a>
+      <button class="replay-btn" type="button" data-replay-intro>重看开场</button>
+    </div>
   </footer>
 </BaseLayout>

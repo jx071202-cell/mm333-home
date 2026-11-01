@@ -9,6 +9,7 @@ export function initUI() {
   initLightbox();
   initCopy();
   initRainScene();
+  initPlayer();
 }
 
 function initIntros() {
@@ -437,5 +438,155 @@ function initRainScene() {
     }
   } else {
     start();
+  }
+}
+
+function initPlayer() {
+  const player = document.querySelector('[data-player]');
+  const audio = document.querySelector('[data-audio]');
+  if (!player || !audio) return;
+
+  const items = [...document.querySelectorAll('[data-song]')];
+  const titleEl = player.querySelector('[data-player-title]');
+  const subEl = player.querySelector('[data-player-sub]');
+  const toggle = player.querySelector('[data-play-toggle]');
+  const prevBtn = player.querySelector('[data-play-prev]');
+  const nextBtn = player.querySelector('[data-play-next]');
+  const seek = player.querySelector('[data-seek]');
+  const fill = player.querySelector('[data-progress]');
+  const curEl = document.querySelector('[data-time-current]');
+  const totalEl = document.querySelector('[data-time-total]');
+
+  let index = -1;
+
+  const fmt = (value) => {
+    if (!Number.isFinite(value) || value < 0) return '0:00';
+    const m = Math.floor(value / 60);
+    const s = Math.floor(value % 60);
+    return `${m}:${String(s).padStart(2, '0')}`;
+  };
+
+  const setState = (i, state) => {
+    items.forEach((item, k) => {
+      const badge = item.querySelector('[data-state]');
+      if (!badge) return;
+      if (k !== i) {
+        badge.textContent = '▶';
+        return;
+      }
+      badge.textContent = state;
+    });
+  };
+
+  const setActive = (i) => {
+    items.forEach((item, k) => {
+      item.classList.toggle('is-active', k === i);
+      item.classList.remove('is-error');
+    });
+  };
+
+  const load = (i, autoplay) => {
+    const item = items[i];
+    if (!item) return;
+    index = i;
+    const id = item.dataset.id;
+    const name = item.querySelector('.playlist__name');
+    const meta = item.querySelector('.playlist__meta');
+    if (titleEl) titleEl.textContent = name ? name.textContent : '未知歌曲';
+    if (subEl) subEl.textContent = meta ? meta.textContent : '';
+    setActive(i);
+    audio.src = `https://music.163.com/song/media/outer/url?id=${encodeURIComponent(id)}.mp3`;
+    audio.load();
+    if (autoplay) {
+      const p = audio.play();
+      if (p && p.catch) p.catch(() => {});
+    }
+  };
+
+  const step = (delta) => {
+    if (!items.length) return;
+    const base = index < 0 ? 0 : index;
+    const next = (base + delta + items.length) % items.length;
+    load(next, true);
+  };
+
+  audio.addEventListener('play', () => {
+    player.classList.add('is-playing');
+    if (toggle) toggle.setAttribute('aria-label', '暂停');
+    setState(index, '❚❚');
+  });
+
+  audio.addEventListener('pause', () => {
+    player.classList.remove('is-playing');
+    if (toggle) toggle.setAttribute('aria-label', '播放');
+    setState(index, '▶');
+  });
+
+  audio.addEventListener('timeupdate', () => {
+    const duration = audio.duration || 0;
+    const current = audio.currentTime || 0;
+    if (fill) fill.style.width = `${duration ? (current / duration) * 100 : 0}%`;
+    if (curEl) curEl.textContent = fmt(current);
+  });
+
+  audio.addEventListener('loadedmetadata', () => {
+    if (totalEl) totalEl.textContent = fmt(audio.duration);
+  });
+
+  audio.addEventListener('ended', () => step(1));
+
+  audio.addEventListener('error', () => {
+    player.classList.remove('is-playing');
+    const item = items[index];
+    if (item) {
+      item.classList.add('is-error');
+      const badge = item.querySelector('[data-state]');
+      if (badge) badge.textContent = '×';
+    }
+    if (subEl) subEl.textContent = '这首歌暂时播不了，去网易云听吧';
+  });
+
+  items.forEach((item, i) => {
+    const button = item.querySelector('[data-play-song]');
+    if (!button) return;
+    button.addEventListener('click', () => {
+      if (index === i) {
+        if (audio.paused) {
+          const p = audio.play();
+          if (p && p.catch) p.catch(() => {});
+        } else {
+          audio.pause();
+        }
+        return;
+      }
+      load(i, true);
+    });
+  });
+
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      if (index < 0) {
+        load(0, true);
+        return;
+      }
+      if (audio.paused) {
+        const p = audio.play();
+        if (p && p.catch) p.catch(() => {});
+      } else {
+        audio.pause();
+      }
+    });
+  }
+
+  if (prevBtn) prevBtn.addEventListener('click', () => step(-1));
+  if (nextBtn) nextBtn.addEventListener('click', () => step(1));
+
+  if (seek) {
+    seek.addEventListener('click', (event) => {
+      if (!audio.duration) return;
+      const rect = seek.getBoundingClientRect();
+      const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+      audio.currentTime = ratio * audio.duration;
+    });
   }
 }
