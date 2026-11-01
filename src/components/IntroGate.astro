@@ -12,11 +12,21 @@ import { withBase } from '../lib/paths';
   <video
     class="gate__video"
     data-gate-video
-    muted
     playsinline
     preload="auto"
     poster={withBase(intro.poster)}
     aria-hidden="true"
   ></video>
   <div class="gate__veil" aria-hidden="true"></div>
+
+  <button class="gate__sound" type="button" data-gate-sound aria-label="打开声音" aria-pressed="false">
+    <svg class="gate__sound-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <path d="M5 9v6h4l5 4V5L9 9H5Z" stroke-linejoin="round" />
+      <path d="M17 9.5 21 14.5M21 9.5 17 14.5" stroke-linecap="round" />
+    </svg>
+    <svg class="gate__sound-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <path d="M5 9v6h4l5 4V5L9 9H5Z" stroke-linejoin="round" />
+      <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" stroke-linecap="round" />
+    </svg>
+  </button>
 </div>

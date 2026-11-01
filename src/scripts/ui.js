@@ -22,6 +22,12 @@ function initIntros() {
 
   let started = false;
 
+  const soundBtn = gate.querySelector('[data-gate-sound]');
+
+  const showSoundBtn = () => {
+    if (soundBtn) soundBtn.classList.add('is-visible');
+  };
+
   const loadVideo = () => {
     if (!video || started || reduceMotion) return;
     started = true;
@@ -32,8 +38,16 @@ function initIntros() {
     video.addEventListener('playing', () => gate.classList.add('is-playing'), { once: true });
     video.addEventListener('error', () => gate.classList.remove('is-playing'), { once: true });
     video.addEventListener('ended', enter, { once: true });
-    const playing = video.play();
-    if (playing && typeof playing.catch === 'function') playing.catch(() => {});
+    video.muted = false;
+    const attempt = video.play();
+    if (attempt && typeof attempt.catch === 'function') {
+      attempt.catch(() => {
+        video.muted = true;
+        showSoundBtn();
+        const retry = video.play();
+        if (retry && typeof retry.catch === 'function') retry.catch(() => {});
+      });
+    }
   };
 
   if (!entered) {
@@ -67,6 +81,29 @@ function initIntros() {
     }
   });
   gate.tabIndex = 0;
+
+  if (soundBtn) {
+    const syncSound = () => {
+      const on = !!video && !video.muted;
+      soundBtn.setAttribute('aria-pressed', String(on));
+      soundBtn.setAttribute('aria-label', on ? '静音' : '打开声音');
+      soundBtn.classList.toggle('is-on', on);
+    };
+    soundBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      if (!video) return;
+      video.muted = !video.muted;
+      if (!video.muted) {
+        const playPromise = video.play();
+        if (playPromise && playPromise.catch) playPromise.catch(() => {});
+      }
+      syncSound();
+    });
+    ['pointerdown', 'keydown'].forEach((type) => {
+      soundBtn.addEventListener(type, (event) => event.stopPropagation());
+    });
+    syncSound();
+  }
 
   const replay = document.querySelectorAll('[data-replay-intro]');
   replay.forEach((button) =>
