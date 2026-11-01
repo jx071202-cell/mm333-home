@@ -72,7 +72,7 @@ try {
   await cdp.send('Runtime.enable', {}, sessionId);
   await cdp.send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false }, sessionId);
   await cdp.send('Page.navigate', { url: BASE + '/' }, sessionId);
-  await sleep(4500);
+  await sleep(9000);
 
   const state = await evaluate(cdp, sessionId, `(() => {
     const v = document.querySelector('[data-gate-video]');
