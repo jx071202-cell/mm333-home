@@ -44,6 +44,11 @@ function initIntros() {
       attempt.catch(() => {
         video.muted = true;
         showSoundBtn();
+        if (soundBtn) {
+          soundBtn.setAttribute('aria-pressed', 'false');
+          soundBtn.setAttribute('aria-label', '打开声音');
+          soundBtn.classList.remove('is-on');
+        }
         const retry = video.play();
         if (retry && typeof retry.catch === 'function') retry.catch(() => {});
       });
@@ -102,7 +107,6 @@ function initIntros() {
     ['pointerdown', 'keydown'].forEach((type) => {
       soundBtn.addEventListener(type, (event) => event.stopPropagation());
     });
-    syncSound();
   }
 
   const replay = document.querySelectorAll('[data-replay-intro]');
