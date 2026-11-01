@@ -114,13 +114,11 @@ function initTheme() {
 function initTopbar() {
   const bar = document.querySelector('.topbar');
   if (!bar) return;
-  const stage = document.querySelector('[data-stage]');
 
   const onScroll = () => {
-    const stageBottom = stage ? stage.offsetTop + stage.offsetHeight : 0;
-    const overDark = stage ? window.scrollY < stageBottom - 90 : false;
+    const overDark = window.scrollY < 40;
     bar.classList.toggle('is-over-dark', overDark);
-    bar.classList.toggle('is-solid', !overDark && window.scrollY > 24);
+    bar.classList.toggle('is-solid', !overDark);
   };
 
   window.addEventListener('scroll', onScroll, { passive: true });
