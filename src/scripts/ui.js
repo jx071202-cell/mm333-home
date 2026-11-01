@@ -1,0 +1,441 @@
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+export function initUI() {
+  initIntros();
+  initTheme();
+  initTopbar();
+  initNavActive();
+  initReveal();
+  initLightbox();
+  initCopy();
+  initRainScene();
+}
+
+function initIntros() {
+  const gate = document.querySelector('[data-gate]');
+  const video = document.querySelector('[data-gate-video]');
+  const html = document.documentElement;
+  if (!gate) return;
+
+  const entered = html.dataset.entered === '1';
+  document.body.classList.toggle('gate-open', !entered);
+
+  let started = false;
+
+  const loadVideo = () => {
+    if (!video || started || reduceMotion) return;
+    started = true;
+    const wide = window.matchMedia('(min-width: 720px)').matches;
+    const src = wide ? gate.dataset.videoWide : gate.dataset.videoSmall;
+    if (!src) return;
+    video.src = src;
+    video.addEventListener('playing', () => gate.classList.add('is-playing'), { once: true });
+    video.addEventListener('error', () => gate.classList.remove('is-playing'), { once: true });
+    const playing = video.play();
+    if (playing && typeof playing.catch === 'function') playing.catch(() => {});
+  };
+
+  if (!entered) {
+    const connection = navigator.connection;
+    const saveData = connection && connection.saveData === true;
+    if (saveData) {
+    } else {
+      window.setTimeout(loadVideo, 120);
+    }
+  }
+
+  const enter = () => {
+    if (html.dataset.entered === '1') return;
+    if (video) video.pause();
+    try {
+      sessionStorage.setItem('mm333-entered', '1');
+    } catch (e) {}
+    gate.classList.add('is-leaving');
+    html.dataset.entered = '1';
+    document.body.classList.remove('gate-open');
+    window.setTimeout(() => {
+      gate.style.display = 'none';
+    }, 1000);
+  };
+
+  gate.addEventListener('click', enter);
+  gate.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ' || event.key === 'Escape') {
+      event.preventDefault();
+      enter();
+    }
+  });
+  gate.tabIndex = 0;
+
+  const replay = document.querySelectorAll('[data-replay-intro]');
+  replay.forEach((button) =>
+    button.addEventListener('click', () => {
+      try {
+        sessionStorage.removeItem('mm333-entered');
+      } catch (e) {}
+      delete html.dataset.entered;
+      gate.style.display = '';
+      gate.classList.remove('is-leaving');
+      document.body.classList.add('gate-open');
+      window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+      started = false;
+      setTimeout(loadVideo, 80);
+    })
+  );
+}
+
+function initTheme() {
+  const html = document.documentElement;
+  const buttons = document.querySelectorAll('[data-theme-toggle]');
+  if (!buttons.length) return;
+
+  const sync = () => {
+    const night = html.dataset.theme === 'night';
+    buttons.forEach((button) => {
+      button.setAttribute('aria-label', night ? '切成黄昏' : '切成夜');
+      button.setAttribute('aria-pressed', String(night));
+    });
+  };
+
+  buttons.forEach((button) =>
+    button.addEventListener('click', () => {
+      const next = html.dataset.theme === 'night' ? 'dusk' : 'night';
+      html.dataset.theme = next;
+      try {
+        localStorage.setItem('mm333-theme', next);
+      } catch (e) {}
+      sync();
+    })
+  );
+  sync();
+}
+
+function initTopbar() {
+  const bar = document.querySelector('.topbar');
+  if (!bar) return;
+  const stage = document.querySelector('[data-stage]');
+
+  const onScroll = () => {
+    const stageBottom = stage ? stage.offsetTop + stage.offsetHeight : 0;
+    const overDark = stage ? window.scrollY < stageBottom - 90 : false;
+    bar.classList.toggle('is-over-dark', overDark);
+    bar.classList.toggle('is-solid', !overDark && window.scrollY > 24);
+  };
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+}
+
+function initNavActive() {
+  const links = [...document.querySelectorAll('[data-nav-link]')];
+  if (!links.length || !('IntersectionObserver' in window)) return;
+
+  const targets = links
+    .map((link) => document.getElementById(link.dataset.navLink))
+    .filter((el) => el);
+
+  const setActive = (id) => {
+    links.forEach((link) => link.classList.toggle('is-active', link.dataset.navLink === id));
+  };
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (visible) setActive(visible.target.id);
+    },
+    { rootMargin: '-42% 0px -42% 0px', threshold: [0, 0.15, 0.4] }
+  );
+
+  targets.forEach((target) => observer.observe(target));
+  setActive('top');
+}
+
+function initReveal() {
+  const items = document.querySelectorAll('[data-reveal]');
+  if (!items.length) return;
+  if (reduceMotion || !('IntersectionObserver' in window)) {
+    items.forEach((el) => el.classList.add('is-in'));
+    return;
+  }
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.classList.add('is-in');
+        observer.unobserve(entry.target);
+      }
+    },
+    { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
+  );
+  items.forEach((el) => observer.observe(el));
+}
+
+function initTabs() {
+  const buttons = [...document.querySelectorAll('[data-tab]')];
+  const panels = [...document.querySelectorAll('[data-panel]')];
+  if (!buttons.length || !panels.length) return;
+
+  const select = (key) => {
+    buttons.forEach((button) => {
+      const active = button.dataset.tab === key;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-selected', String(active));
+    });
+    panels.forEach((panel) => panel.classList.toggle('is-active', panel.dataset.panel === key));
+  };
+
+  buttons.forEach((button) => button.addEventListener('click', () => select(button.dataset.tab)));
+}
+
+function initLightbox() {
+  const figures = [...document.querySelectorAll('[data-zoom]')];
+  if (!figures.length) return;
+
+  const box = document.createElement('div');
+  box.className = 'lightbox';
+  box.setAttribute('role', 'dialog');
+  box.setAttribute('aria-modal', 'true');
+  box.innerHTML = `
+    <button class="lightbox__close" type="button" aria-label="关闭">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <img alt="" />`;
+  document.body.appendChild(box);
+  const img = box.querySelector('img');
+
+  const close = () => {
+    box.classList.remove('is-open');
+    document.body.style.overflow = '';
+  };
+
+  figures.forEach((figure) => {
+    const source = figure.querySelector('img');
+    figure.addEventListener('click', () => {
+      img.src = source.currentSrc || source.src;
+      img.alt = source.alt || '';
+      box.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+  box.addEventListener('click', (event) => {
+    if (event.target === box || event.target.closest('.lightbox__close')) close();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') close();
+  });
+}
+
+function initCopy() {
+  document.querySelectorAll('[data-copy]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const value = button.dataset.copy || '';
+      try {
+        await navigator.clipboard.writeText(value);
+      } catch (e) {
+        const area = document.createElement('textarea');
+        area.value = value;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand('copy');
+        area.remove();
+      }
+      const original = button.textContent;
+      button.textContent = '已复制';
+      button.classList.add('is-done');
+      setTimeout(() => {
+        button.textContent = original;
+        button.classList.remove('is-done');
+      }, 1600);
+    });
+  });
+}
+
+function initRainScene() {
+  const stage = document.querySelector('[data-stage]');
+  const canvas = document.querySelector('[data-rain]');
+  const art = document.querySelector('[data-art]');
+  if (!stage || !canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  let width = 0;
+  let height = 0;
+  let dpr = 1;
+  let drops = [];
+  let ripples = [];
+  let raf = 0;
+  let last = 0;
+  let pointer = { x: -999, y: -999, active: false };
+  let target = { px: 0, py: 0 };
+  let current = { px: 0, py: 0 };
+  const UMBRELLA_R = 96;
+
+  const resize = () => {
+    const rect = canvas.getBoundingClientRect();
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    width = rect.width;
+    height = rect.height;
+    canvas.width = Math.max(1, Math.round(width * dpr));
+    canvas.height = Math.max(1, Math.round(height * dpr));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const count = Math.round(Math.min(420, Math.max(90, (width * height) / 11000)));
+    drops = Array.from({ length: count }, () => spawn(true));
+  };
+
+  function spawn(initial = false) {
+    return {
+      x: Math.random() * (width + 160) - 80,
+      y: initial ? Math.random() * height : -30 - Math.random() * 140,
+      len: 8 + Math.random() * 22,
+      speed: 460 + Math.random() * 620,
+      alpha: 0.1 + Math.random() * 0.35,
+      wind: 0.1 + Math.random() * 0.08,
+      width: Math.random() > 0.85 ? 1.3 : 0.7,
+    };
+  }
+
+  const draw = (time) => {
+    raf = 0;
+    const dt = last ? Math.min(0.05, (time - last) / 1000) : 0.016;
+    last = time;
+    ctx.clearRect(0, 0, width, height);
+
+    const px = pointer.x;
+    const py = pointer.y;
+
+    ctx.lineCap = 'round';
+    for (const drop of drops) {
+      let vx = drop.speed * drop.wind;
+      let vy = drop.speed;
+
+      if (pointer.active) {
+        const dx = drop.x - px;
+        const dy = drop.y - py;
+        const dist = Math.hypot(dx, dy);
+        if (dist < UMBRELLA_R + 30 && dist > 0.0001) {
+          const force = (1 - dist / (UMBRELLA_R + 30)) * 260;
+          vx += (dx / dist) * force * 0.9;
+          vy += (dy / dist) * force * 0.35;
+        }
+      }
+
+      drop.x += vx * dt;
+      drop.y += vy * dt;
+      if (drop.y > height + 24 || drop.x < -120 || drop.x > width + 120) {
+        Object.assign(drop, spawn(false));
+        continue;
+      }
+
+      const grad = ctx.createLinearGradient(drop.x, drop.y, drop.x, drop.y + drop.len);
+      grad.addColorStop(0, 'rgba(214, 236, 250, 0)');
+      grad.addColorStop(0.5, `rgba(214, 236, 250, ${drop.alpha})`);
+      grad.addColorStop(1, 'rgba(240, 250, 255, 0.05)');
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = drop.width;
+      ctx.beginPath();
+      ctx.moveTo(drop.x, drop.y);
+      ctx.lineTo(drop.x - drop.len * drop.wind * 2.2, drop.y + drop.len);
+      ctx.stroke();
+    }
+
+    ripples = ripples.filter((ripple) => {
+      ripple.life -= dt * 1.4;
+      if (ripple.life <= 0) return false;
+      const r = (1 - ripple.life) * 130 + 6;
+      ctx.beginPath();
+      ctx.strokeStyle = `rgba(220, 242, 255, ${0.35 * ripple.life})`;
+      ctx.lineWidth = 1.2;
+      ctx.ellipse(ripple.x, ripple.y, r, r * 0.34, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      return true;
+    });
+
+    if (pointer.active) {
+      const halo = ctx.createRadialGradient(px, py, 0, px, py, UMBRELLA_R);
+      halo.addColorStop(0, 'rgba(200, 232, 255, 0.12)');
+      halo.addColorStop(0.65, 'rgba(200, 232, 255, 0.045)');
+      halo.addColorStop(1, 'rgba(200, 232, 255, 0)');
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(px, py, UMBRELLA_R, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    current.px += (target.px - current.px) * 0.06;
+    current.py += (target.py - current.py) * 0.06;
+    stage.style.setProperty('--px', `${current.px.toFixed(2)}px`);
+    stage.style.setProperty('--py', `${current.py.toFixed(2)}px`);
+    if (art) art.style.transform = `scale(1.06) translate3d(${(-current.px * 0.6).toFixed(2)}px, ${(-current.py * 0.4).toFixed(2)}px, 0)`;
+
+    raf = requestAnimationFrame(draw);
+  };
+
+  const start = () => {
+    if (!raf && !reduceMotion) raf = requestAnimationFrame(draw);
+  };
+
+  const stop = () => {
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
+  };
+
+  stage.addEventListener('pointermove', (event) => {
+    const rect = stage.getBoundingClientRect();
+    pointer.x = event.clientX - rect.left;
+    pointer.y = event.clientY - rect.top;
+    pointer.active = true;
+    target.px = ((event.clientX / window.innerWidth) - 0.5) * 22;
+    target.py = ((event.clientY / window.innerHeight) - 0.5) * 14;
+  });
+  stage.addEventListener('pointerleave', () => {
+    pointer.active = false;
+    pointer.x = -999;
+    pointer.y = -999;
+    target.px = 0;
+    target.py = 0;
+  });
+  stage.addEventListener('pointerdown', (event) => {
+    const rect = stage.getBoundingClientRect();
+    ripples.push({
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+      life: 1,
+    });
+    for (const drop of drops) {
+      const dx = drop.x - ripples[ripples.length - 1].x;
+      const dy = drop.y - ripples[ripples.length - 1].y;
+      const dist = Math.hypot(dx, dy);
+      if (dist < 150 && dist > 1) {
+        drop.x += (dx / dist) * 26;
+        drop.y += (dy / dist) * 14;
+      }
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    resize();
+    start();
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop();
+    else start();
+  });
+
+  resize();
+
+  if (reduceMotion) {
+    for (const drop of drops) {
+      ctx.strokeStyle = `rgba(214, 236, 250, ${drop.alpha * 0.9})`;
+      ctx.lineWidth = drop.width;
+      ctx.beginPath();
+      ctx.moveTo(drop.x, drop.y);
+      ctx.lineTo(drop.x - drop.len * drop.wind * 2.2, drop.y + drop.len);
+      ctx.stroke();
+    }
+  } else {
+    start();
+  }
+}

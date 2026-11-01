@@ -1,0 +1,41 @@
+---
+import { intro, site } from '../data/site';
+import { withBase } from '../lib/paths';
+---
+<div
+  class="gate"
+  data-gate
+  data-video-wide={withBase(intro.videoWide)}
+  data-video-small={withBase(intro.videoSmall)}
+  aria-label="开场视频，点击进入"
+>
+  <video
+    class="gate__video"
+    data-gate-video
+    muted
+    loop
+    playsinline
+    preload="none"
+    poster={withBase(intro.poster)}
+    aria-hidden="true"
+  ></video>
+  <div class="gate__scrim" aria-hidden="true"></div>
+
+  <div class="gate__inner">
+    <p class="gate__kicker">{intro.kicker}</p>
+    <h1 class="gate__title">
+      {intro.title.map((line) => <span>{line}</span>)}
+    </h1>
+    <p class="gate__hint">
+      <span class="gate__pulse" aria-hidden="true"></span>
+      {intro.hint}
+    </p>
+    <button class="gate__skip" type="button" data-gate-skip>{intro.skip}</button>
+  </div>
+
+  <div class="gate__corner" aria-hidden="true">
+    <span class="gate__name">{site.name}</span>
+    <span class="gate__dot"></span>
+    <span class="gate__since">since {site.since}</span>
+  </div>
+</div>

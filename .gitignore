@@ -1,0 +1,12 @@
+dist/
+.output/
+.astro/
+node_modules/
+*.log
+.env
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+preview/

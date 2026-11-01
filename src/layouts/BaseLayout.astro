@@ -1,0 +1,61 @@
+---
+import '../styles/global.css';
+import TopBar from '../components/TopBar.astro';
+import IntroGate from '../components/IntroGate.astro';
+import { site } from '../data/site';
+import { withBase } from '../lib/paths';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description = site.description } = Astro.props;
+const pageTitle = title ? `${title} · ${site.siteTitle}` : site.siteTitle;
+const origin = Astro.site ?? new URL(site.url);
+const canonical = new URL(Astro.url.pathname, origin).href;
+const ogImage = new URL(withBase('/images/og.jpg'), origin).href;
+---
+<!doctype html>
+<html lang="zh-CN" data-theme="dusk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={site.name} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
+    <link rel="preload" as="image" href={withBase('/images/poster.jpg')} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline>
+      (function () {
+        try {
+          var t = localStorage.getItem('mm333-theme');
+          document.documentElement.dataset.theme = t === 'night' ? 'night' : 'dusk';
+        } catch (e) {}
+        try {
+          if (sessionStorage.getItem('mm333-entered') === '1') {
+            document.documentElement.dataset.entered = '1';
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <TopBar />
+    <IntroGate />
+    <main class="page" id="main">
+      <slot />
+    </main>
+    <script>
+      import { initUI } from '../scripts/ui.js';
+      initUI();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/paths';
+---
+<BaseLayout title="页面走丢了">
+  <section class="section" style="text-align:center;padding-block:6rem">
+    <p class="section__sub" style="margin:0 0 1rem">404 · NOT FOUND</p>
+    <h1 class="section__title">这一页去躲雨了</h1>
+    <p class="section__body" style="margin:1.2rem 0 2rem">链接可能过期了，也可能是我改了名字。</p>
+    <div class="hero__actions" style="justify-content:center">
+      <a class="btn btn--accent" href={withBase('/')}>回小窝</a>
+    </div>
+  </section>
+</BaseLayout>
