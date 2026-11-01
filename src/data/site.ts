@@ -21,11 +21,19 @@ export const scene = {
   art: '/images/scene-art.jpg',
   artWide: '/images/scene-wide.jpg',
   artTall: '/images/scene-tall.jpg',
-  kicker: 'WEATHERING WITH YOU',
-  title: 'mm333 的小窝',
-  lines: ['雨会停的。', '在那之前，先在这里听会歌。'],
-  hint: '移动鼠标：雨会绕开你 · 点击：水面会荡开',
-  credit: '壁纸还原：天气之子 · 嘻嘻嘻，为你打伞~',
+};
+
+export const hero = {
+  greeting: '你好呀，欢迎来到我的小窝～',
+  title: '我是 mm333',
+  suffix: ' ～',
+  sub: '关于 mm333 的一切',
+  avatar: 'https://q1.qlogo.cn/g?b=qq&nk=2621636916&s=140',
+  socials: [
+    { label: 'QQ', href: 'https://wpa.qq.com/msgrd?v=3&uin=2621636916&site=qq&menu=yes' },
+    { label: 'QQ 空间', href: 'https://user.qzone.qq.com/2621636916' },
+    { label: '邮件', href: 'mailto:2621636916@qq.com' },
+  ],
 };
 
 export const nav = [

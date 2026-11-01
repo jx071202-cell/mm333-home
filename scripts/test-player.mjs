@@ -105,6 +105,20 @@ try {
   const { data } = await cdp.send('Page.captureScreenshot', { format: 'png' }, sessionId);
   await writeFile(path.join(OUT, 'player.png'), Buffer.from(data, 'base64'));
   console.log('saved player.png');
+
+  await evaluate(cdp, sessionId, `document.querySelector('[data-toggle-playlist]')?.click()`);
+  await sleep(700);
+  const pop = await cdp.send('Page.captureScreenshot', { format: 'png' }, sessionId);
+  await writeFile(path.join(OUT, 'playlist.png'), Buffer.from(pop.data, 'base64'));
+  console.log('saved playlist.png');
+
+  await evaluate(cdp, sessionId, `document.querySelector('[data-toggle-playlist]')?.click()`);
+  await sleep(400);
+  await evaluate(cdp, sessionId, `window.scrollTo(0, 0)`);
+  await sleep(600);
+  const hero = await cdp.send('Page.captureScreenshot', { format: 'png' }, sessionId);
+  await writeFile(path.join(OUT, 'hero.png'), Buffer.from(hero.data, 'base64'));
+  console.log('saved hero.png');
   ws.close();
 } finally {
   browser.kill();

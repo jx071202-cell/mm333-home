@@ -1,0 +1,21 @@
+---
+import { scene } from '../data/site';
+import { withBase } from '../lib/paths';
+---
+<div class="backdrop" data-backdrop aria-hidden="true">
+  <picture>
+    <source media="(min-width: 900px)" srcset={withBase(scene.artWide)} />
+    <source media="(max-width: 899px)" srcset={withBase(scene.artTall)} />
+    <img
+      class="backdrop__art"
+      data-art
+      src={withBase(scene.art)}
+      alt=""
+      decoding="async"
+      fetchpriority="high"
+    />
+  </picture>
+  <canvas class="backdrop__rain" data-rain></canvas>
+  <div class="backdrop__scrim"></div>
+  <div class="backdrop__grain"></div>
+</div>

@@ -2,13 +2,12 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
 
 export function initUI() {
   initIntros();
-  initTheme();
   initTopbar();
   initNavActive();
   initReveal();
   initLightbox();
   initCopy();
-  initRainScene();
+  initBackdropScene();
   initPlayer();
 }
 
@@ -32,6 +31,7 @@ function initIntros() {
     video.src = src;
     video.addEventListener('playing', () => gate.classList.add('is-playing'), { once: true });
     video.addEventListener('error', () => gate.classList.remove('is-playing'), { once: true });
+    video.addEventListener('ended', enter, { once: true });
     const playing = video.play();
     if (playing && typeof playing.catch === 'function') playing.catch(() => {});
   };
@@ -116,9 +116,7 @@ function initTopbar() {
   if (!bar) return;
 
   const onScroll = () => {
-    const overDark = window.scrollY < 40;
-    bar.classList.toggle('is-over-dark', overDark);
-    bar.classList.toggle('is-solid', !overDark);
+    bar.classList.toggle('is-solid', window.scrollY > 40);
   };
 
   window.addEventListener('scroll', onScroll, { passive: true });
@@ -531,6 +529,26 @@ function initPlayer() {
     if (totalEl) totalEl.textContent = fmt(audio.duration);
   });
 
+  const pop = document.querySelector('[data-playlist-pop]');
+  const listBtn = document.querySelector('[data-toggle-playlist]');
+  if (pop && listBtn) {
+    const setOpen = (open) => {
+      pop.classList.toggle('is-open', open);
+      pop.setAttribute('aria-hidden', String(!open));
+      listBtn.setAttribute('aria-expanded', String(open));
+    };
+    listBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      setOpen(!pop.classList.contains('is-open'));
+    });
+    document.addEventListener('click', (event) => {
+      if (!pop.contains(event.target) && !listBtn.contains(event.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') setOpen(false);
+    });
+  }
+
   audio.addEventListener('ended', () => step(1));
 
   audio.addEventListener('error', () => {
@@ -586,5 +604,185 @@ function initPlayer() {
       const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
       audio.currentTime = ratio * audio.duration;
     });
+  }
+}
+
+function initBackdropScene() {
+  const backdrop = document.querySelector('[data-backdrop]');
+  const canvas = document.querySelector('[data-rain]');
+  const art = document.querySelector('[data-art]');
+  if (!backdrop || !canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  let width = 0;
+  let height = 0;
+  let dpr = 1;
+  let drops = [];
+  let ripples = [];
+  let raf = 0;
+  let last = 0;
+  const pointer = { x: -999, y: -999, active: false };
+  const target = { px: 0, py: 0 };
+  const current = { px: 0, py: 0 };
+  const UMBRELLA = 96;
+
+  const spawn = (initial) => ({
+    x: Math.random() * (width + 160) - 80,
+    y: initial ? Math.random() * height : -30 - Math.random() * 140,
+    len: 8 + Math.random() * 22,
+    speed: 460 + Math.random() * 620,
+    alpha: 0.1 + Math.random() * 0.35,
+    wind: 0.1 + Math.random() * 0.08,
+    w: Math.random() > 0.85 ? 1.3 : 0.7,
+  });
+
+  const resize = () => {
+    const rect = canvas.getBoundingClientRect();
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    width = rect.width;
+    height = rect.height;
+    canvas.width = Math.max(1, Math.round(width * dpr));
+    canvas.height = Math.max(1, Math.round(height * dpr));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const count = Math.round(Math.min(480, Math.max(90, (width * height) / 10000)));
+    drops = Array.from({ length: count }, () => spawn(true));
+  };
+
+  const draw = (time) => {
+    raf = 0;
+    const dt = last ? Math.min(0.05, (time - last) / 1000) : 0.016;
+    last = time;
+    ctx.clearRect(0, 0, width, height);
+
+    const px = pointer.x;
+    const py = pointer.y;
+
+    ctx.lineCap = 'round';
+    for (const drop of drops) {
+      let vx = drop.speed * drop.wind;
+      let vy = drop.speed;
+      if (pointer.active) {
+        const dx = drop.x - px;
+        const dy = drop.y - py;
+        const dist = Math.hypot(dx, dy);
+        if (dist < UMBRELLA + 30 && dist > 0.0001) {
+          const force = (1 - dist / (UMBRELLA + 30)) * 260;
+          vx += (dx / dist) * force * 0.9;
+          vy += (dy / dist) * force * 0.35;
+        }
+      }
+      drop.x += vx * dt;
+      drop.y += vy * dt;
+      if (drop.y > height + 24 || drop.x < -120 || drop.x > width + 120) {
+        Object.assign(drop, spawn(false));
+        continue;
+      }
+      const grad = ctx.createLinearGradient(drop.x, drop.y, drop.x, drop.y + drop.len);
+      grad.addColorStop(0, 'rgba(214, 236, 250, 0)');
+      grad.addColorStop(0.5, `rgba(214, 236, 250, ${drop.alpha})`);
+      grad.addColorStop(1, 'rgba(240, 250, 255, 0.05)');
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = drop.w;
+      ctx.beginPath();
+      ctx.moveTo(drop.x, drop.y);
+      ctx.lineTo(drop.x - drop.len * drop.wind * 2.2, drop.y + drop.len);
+      ctx.stroke();
+    }
+
+    ripples = ripples.filter((ripple) => {
+      ripple.life -= dt * 1.4;
+      if (ripple.life <= 0) return false;
+      const r = (1 - ripple.life) * 130 + 6;
+      ctx.beginPath();
+      ctx.strokeStyle = `rgba(220, 242, 255, ${0.35 * ripple.life})`;
+      ctx.lineWidth = 1.2;
+      ctx.ellipse(ripple.x, ripple.y, r, r * 0.34, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      return true;
+    });
+
+    if (pointer.active) {
+      const halo = ctx.createRadialGradient(px, py, 0, px, py, UMBRELLA);
+      halo.addColorStop(0, 'rgba(200, 232, 255, 0.12)');
+      halo.addColorStop(0.65, 'rgba(200, 232, 255, 0.045)');
+      halo.addColorStop(1, 'rgba(200, 232, 255, 0)');
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(px, py, UMBRELLA, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    current.px += (target.px - current.px) * 0.06;
+    current.py += (target.py - current.py) * 0.06;
+    if (art) {
+      art.style.transform = `scale(1.04) translate3d(${(-current.px).toFixed(2)}px, ${(-current.py).toFixed(2)}px, 0)`;
+    }
+
+    raf = requestAnimationFrame(draw);
+  };
+
+  const start = () => {
+    if (!raf && !reduceMotion) raf = requestAnimationFrame(draw);
+  };
+
+  const stop = () => {
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
+  };
+
+  window.addEventListener('pointermove', (event) => {
+    pointer.x = event.clientX;
+    pointer.y = event.clientY;
+    pointer.active = true;
+    target.px = (event.clientX / window.innerWidth - 0.5) * 22;
+    target.py = (event.clientY / window.innerHeight - 0.5) * 14;
+  });
+
+  document.addEventListener('pointerleave', () => {
+    pointer.active = false;
+    pointer.x = -999;
+    pointer.y = -999;
+    target.px = 0;
+    target.py = 0;
+  });
+
+  document.addEventListener('pointerdown', (event) => {
+    if (event.target.closest('a,button,input,textarea,select,.song-panel,.topbar,.gate,.lightbox')) return;
+    ripples.push({ x: event.clientX, y: event.clientY, life: 1 });
+    for (const drop of drops) {
+      const dx = drop.x - event.clientX;
+      const dy = drop.y - event.clientY;
+      const dist = Math.hypot(dx, dy);
+      if (dist < 150 && dist > 1) {
+        drop.x += (dx / dist) * 26;
+        drop.y += (dy / dist) * 14;
+      }
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    resize();
+    start();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop();
+    else start();
+  });
+
+  resize();
+
+  if (reduceMotion) {
+    for (const drop of drops) {
+      ctx.strokeStyle = `rgba(214, 236, 250, ${drop.alpha * 0.9})`;
+      ctx.lineWidth = drop.w;
+      ctx.beginPath();
+      ctx.moveTo(drop.x, drop.y);
+      ctx.lineTo(drop.x - drop.len * drop.wind * 2.2, drop.y + drop.len);
+      ctx.stroke();
+    }
+  } else {
+    start();
   }
 }

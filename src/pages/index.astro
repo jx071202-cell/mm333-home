@@ -1,82 +1,77 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import SceneStage from '../components/SceneStage.astro';
-import { contacts, playlist, site } from '../data/site';
+import { hero, playlist } from '../data/site';
 ---
 <BaseLayout>
-  <SceneStage />
-
-  <section class="section" id="songs" data-reveal>
-    <div class="section__head">
-      <div class="section__title-wrap">
-        <span class="section__num">01</span>
-        <h2 class="section__title">我的歌单</h2>
-      </div>
-      <span class="section__sub">Playlist</span>
-    </div>
-
-    <div class="player" data-player>
-      <div class="player__now">
-        <span class="player__art" aria-hidden="true">♪</span>
-        <div class="player__meta">
-          <span class="player__title" data-player-title>选一首开始</span>
-          <span class="player__sub" data-player-sub>点下面的歌名播放</span>
-        </div>
-      </div>
-
-      <div class="player__controls">
-        <button class="player__btn" type="button" data-play-prev aria-label="上一首">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 5v14M18 5l-9 7 9 7V5Z" stroke-linejoin="round" /></svg>
-        </button>
-        <button class="player__btn player__btn--main" type="button" data-play-toggle aria-label="播放">
-          <svg class="player__icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5Z" /></svg>
-          <svg class="player__icon-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z" /></svg>
-        </button>
-        <button class="player__btn" type="button" data-play-next aria-label="下一首">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 5v14M6 5l9 7-9 7V5Z" stroke-linejoin="round" /></svg>
-        </button>
-      </div>
-
-      <div class="player__progress">
-        <span class="player__time" data-time-current>0:00</span>
-        <div class="player__bar" data-seek>
-          <span class="player__fill" data-progress></span>
-        </div>
-        <span class="player__time" data-time-total>0:00</span>
+  <section class="hero hero--center" id="top">
+    <div class="hero__center">
+      <img class="hero__avatar" src={hero.avatar} alt="mm333 的头像" />
+      <p class="hero__greeting">{hero.greeting}</p>
+      <h1 class="hero__title">{hero.title}<span>{hero.suffix}</span></h1>
+      <p class="hero__sub">{hero.sub}</p>
+      <div class="hero__socials">
+        {
+          hero.socials.map((item) => (
+            <a class="hero__social" href={item.href} target="_blank" rel="noopener">{item.label}</a>
+          ))
+        }
       </div>
     </div>
-
-    <ul class="playlist">
-      {
-        playlist.songs.map((song, index) => (
-          <li class="playlist__item" data-song data-index={index} data-id={song.id}>
-            <button type="button" class="playlist__button" data-play-song={index}>
-              <span class="playlist__idx">{String(index + 1).padStart(2, '0')}</span>
-              <span class="playlist__body">
-                <span class="playlist__name">{song.name}</span>
-                <span class="playlist__meta">{song.artist} · {song.album}</span>
-              </span>
-              <span class="playlist__state" data-state aria-hidden="true">▶</span>
-            </button>
-          </li>
-        ))
-      }
-    </ul>
-
-    <p class="playlist__note">
-      歌单来自 <a href={playlist.source.href} target="_blank" rel="noopener">{playlist.source.label}</a>。{playlist.note}
-    </p>
-
-    <audio data-audio preload="none"></audio>
   </section>
 
-  <footer class="footer">
-    <p style="margin:0">© {new Date().getFullYear()} {site.name} · 在自己的小窝里</p>
-    <p class="footer__jp" style="margin:0">あめのち、はれ。</p>
-    <div class="footer__links">
-      <a href={contacts.qqZone} target="_blank" rel="noopener">QQ 空间</a>
-      <a href={`mailto:${contacts.email}`}>邮件</a>
-      <button class="replay-btn" type="button" data-replay-intro>重看开场</button>
+  <div class="playlist-pop" data-playlist-pop aria-hidden="true">
+    <div class="playlist-pop__inner">
+      <p class="playlist-pop__title">播放列表</p>
+      <ul class="playlist">
+        {
+          playlist.songs.map((song, index) => (
+            <li class="playlist__item" data-song data-index={index} data-id={song.id}>
+              <button type="button" class="playlist__button" data-play-song={index}>
+                <span class="playlist__idx">{String(index + 1).padStart(2, '0')}</span>
+                <span class="playlist__body">
+                  <span class="playlist__name">{song.name}</span>
+                  <span class="playlist__meta">{song.artist} · {song.album}</span>
+                </span>
+                <span class="playlist__state" data-state aria-hidden="true">▶</span>
+              </button>
+            </li>
+          ))
+        }
+      </ul>
     </div>
-  </footer>
+  </div>
+
+  <div class="player-bar" data-player>
+    <div class="player-bar__controls">
+      <button class="player__btn" type="button" data-play-prev aria-label="上一首">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 5v14M18 5l-9 7 9 7V5Z" stroke-linejoin="round" /></svg>
+      </button>
+      <button class="player__btn player__btn--main" type="button" data-play-toggle aria-label="播放">
+        <svg class="player__icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5Z" /></svg>
+        <svg class="player__icon-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z" /></svg>
+      </button>
+      <button class="player__btn" type="button" data-play-next aria-label="下一首">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 5v14M6 5l9 7-9 7V5Z" stroke-linejoin="round" /></svg>
+      </button>
+    </div>
+
+    <div class="player-bar__track">
+      <span class="player__title" data-player-title>选一首开始</span>
+      <span class="player__sub" data-player-sub>点右边列表选歌</span>
+    </div>
+
+    <div class="player-bar__progress">
+      <span class="player__time" data-time-current>0:00</span>
+      <div class="player__bar" data-seek>
+        <span class="player__fill" data-progress></span>
+      </div>
+      <span class="player__time" data-time-total>0:00</span>
+    </div>
+
+    <button class="player-bar__list" type="button" data-toggle-playlist aria-label="播放列表">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h11M4 18h7" stroke-linecap="round" /></svg>
+    </button>
+
+    <audio data-audio preload="none"></audio>
+  </div>
 </BaseLayout>

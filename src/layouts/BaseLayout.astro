@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import TopBar from '../components/TopBar.astro';
 import IntroGate from '../components/IntroGate.astro';
+import SiteBackdrop from '../components/SiteBackdrop.astro';
 import { site } from '../data/site';
 import { withBase } from '../lib/paths';
 
@@ -48,6 +49,7 @@ const ogImage = new URL(withBase('/images/og.jpg'), origin).href;
     </script>
   </head>
   <body>
+    <SiteBackdrop />
     <TopBar />
     <IntroGate />
     <main class="page" id="main">
