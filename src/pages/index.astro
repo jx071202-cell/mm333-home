@@ -2,10 +2,19 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { hero, playlist } from '../data/site';
 import WindChimes from '../components/WindChimes.astro';
+import { withBase } from '../lib/paths';
 ---
 <BaseLayout>
   <section class="hero hero--center" id="top">
     <WindChimes />
+    <div class="side-art side-art--left" aria-hidden="true">
+      <img src={withBase('/images/side-left.jpg')} alt="" loading="lazy" />
+      <img src={withBase('/images/side-right.jpg')} alt="" loading="lazy" />
+    </div>
+    <div class="side-art side-art--right" aria-hidden="true">
+      <img src={withBase('/images/side-third.jpg')} alt="" loading="lazy" />
+      <img src={withBase('/images/side-fourth.jpg')} alt="" loading="lazy" />
+    </div>
     <div class="hero__center">
       <img class="hero__avatar" src={hero.avatar} alt="mm333 的头像" />
       <p class="hero__greeting">{hero.greeting}</p>
