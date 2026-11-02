@@ -32,7 +32,7 @@ export const hero = {
   socials: [
     { label: 'QQ', href: 'https://wpa.qq.com/msgrd?v=3&uin=2621636916&site=qq&menu=yes' },
     { label: 'QQ 空间', href: 'https://user.qzone.qq.com/2621636916' },
-    { label: '网易云', href: 'https://music.163.com/' },
+    { label: '网易云', href: 'https://music.163.com/#/user/home?id=8492969981' },
   ],
 };
 
