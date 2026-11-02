@@ -12,8 +12,8 @@ export const intro = {
   title: ['放轻松，', '这里是我的地方。'],
   hint: '点击任意位置进入',
   skip: '跳过开场',
-  videoWide: '/media/intro-720.mp4',
-  videoSmall: '/media/intro-540.mp4',
+  videoWide: '/media/intro-1080.mp4',
+  videoSmall: '/media/intro-720.mp4',
   poster: '/images/poster.jpg',
 };
 
