@@ -479,95 +479,67 @@ function initRainScene() {
 }
 
 function initPlayer() {
-  const player = document.querySelector('[data-player]');
-  const audio = document.querySelector('[data-audio]');
-  if (!player || !audio) return;
-
+  const bar = document.querySelector('[data-player]');
+  const wrap = document.querySelector('.player-bar__frame-wrap');
+  const titleEl = document.querySelector('[data-player-title]');
+  const subEl = document.querySelector('[data-player-sub]');
   const items = [...document.querySelectorAll('[data-song]')];
-  const titleEl = player.querySelector('[data-player-title]');
-  const subEl = player.querySelector('[data-player-sub]');
-  const toggle = player.querySelector('[data-play-toggle]');
-  const prevBtn = player.querySelector('[data-play-prev]');
-  const nextBtn = player.querySelector('[data-play-next]');
-  const seek = player.querySelector('[data-seek]');
-  const fill = player.querySelector('[data-progress]');
-  const curEl = document.querySelector('[data-time-current]');
-  const totalEl = document.querySelector('[data-time-total]');
+  if (!wrap || !items.length) return;
+
+  const songs = items.map((el) => ({
+    id: el.dataset.id,
+    name: el.querySelector('.playlist__name')?.textContent.trim() || '',
+    meta: el.querySelector('.playlist__meta')?.textContent.trim() || '',
+  }));
 
   let index = -1;
+  let frame = null;
 
-  const fmt = (value) => {
-    if (!Number.isFinite(value) || value < 0) return '0:00';
-    const m = Math.floor(value / 60);
-    const s = Math.floor(value % 60);
-    return `${m}:${String(s).padStart(2, '0')}`;
+  wrap.querySelectorAll('[data-player-frame]').forEach((el) => el.remove());
+
+  const playerUrl = (id, auto) =>
+    `https://music.163.com/outchain/player?type=2&id=${encodeURIComponent(id)}&auto=${auto}&height=66`;
+
+  const load = (id, auto) => {
+    const next = document.createElement('iframe');
+    next.className = 'player-bar__frame';
+    next.setAttribute('data-player-frame', '');
+    next.title = '网易云音乐播放器';
+    next.allow = 'autoplay; encrypted-media';
+    next.loading = 'eager';
+    next.src = playerUrl(id, auto);
+    if (frame) frame.replaceWith(next);
+    else wrap.appendChild(next);
+    frame = next;
   };
 
-  const setState = (i, state) => {
-    items.forEach((item, k) => {
-      const badge = item.querySelector('[data-state]');
-      if (!badge) return;
-      if (k !== i) {
-        badge.textContent = '▶';
-        return;
-      }
-      badge.textContent = state;
+  const select = (next, autoplay) => {
+    if (!songs[next]) return;
+    index = next;
+    const song = songs[next];
+    load(song.id, autoplay ? 1 : 0);
+    if (titleEl) titleEl.textContent = song.name;
+    if (subEl) subEl.textContent = song.meta;
+    if (bar) bar.classList.add('is-playing');
+    items.forEach((el, i) => {
+      el.classList.toggle('is-active', i === next);
+      const state = el.querySelector('[data-state]');
+      if (state) state.textContent = i === next ? '❚❚' : '▶';
     });
   };
 
-  const setActive = (i) => {
-    items.forEach((item, k) => {
-      item.classList.toggle('is-active', k === i);
-      item.classList.remove('is-error');
+  items.forEach((el) => {
+    el.querySelector('[data-play-song]')?.addEventListener('click', () => {
+      select(Number(el.dataset.index), true);
     });
-  };
-
-  const load = (i, autoplay) => {
-    const item = items[i];
-    if (!item) return;
-    index = i;
-    const id = item.dataset.id;
-    const name = item.querySelector('.playlist__name');
-    const meta = item.querySelector('.playlist__meta');
-    if (titleEl) titleEl.textContent = name ? name.textContent : '未知歌曲';
-    if (subEl) subEl.textContent = meta ? meta.textContent : '';
-    setActive(i);
-    audio.src = `https://music.163.com/song/media/outer/url?id=${encodeURIComponent(id)}.mp3`;
-    audio.load();
-    if (autoplay) {
-      const p = audio.play();
-      if (p && p.catch) p.catch(() => {});
-    }
-  };
-
-  const step = (delta) => {
-    if (!items.length) return;
-    const base = index < 0 ? 0 : index;
-    const next = (base + delta + items.length) % items.length;
-    load(next, true);
-  };
-
-  audio.addEventListener('play', () => {
-    player.classList.add('is-playing');
-    if (toggle) toggle.setAttribute('aria-label', '暂停');
-    setState(index, '❚❚');
   });
 
-  audio.addEventListener('pause', () => {
-    player.classList.remove('is-playing');
-    if (toggle) toggle.setAttribute('aria-label', '播放');
-    setState(index, '▶');
+  document.querySelector('[data-play-prev]')?.addEventListener('click', () => {
+    select((index - 1 + songs.length) % songs.length, true);
   });
 
-  audio.addEventListener('timeupdate', () => {
-    const duration = audio.duration || 0;
-    const current = audio.currentTime || 0;
-    if (fill) fill.style.width = `${duration ? (current / duration) * 100 : 0}%`;
-    if (curEl) curEl.textContent = fmt(current);
-  });
-
-  audio.addEventListener('loadedmetadata', () => {
-    if (totalEl) totalEl.textContent = fmt(audio.duration);
+  document.querySelector('[data-play-next]')?.addEventListener('click', () => {
+    select((index + 1) % songs.length, true);
   });
 
   const pop = document.querySelector('[data-playlist-pop]');
@@ -590,62 +562,7 @@ function initPlayer() {
     });
   }
 
-  audio.addEventListener('ended', () => step(1));
-
-  audio.addEventListener('error', () => {
-    player.classList.remove('is-playing');
-    const item = items[index];
-    if (item) {
-      item.classList.add('is-error');
-      const badge = item.querySelector('[data-state]');
-      if (badge) badge.textContent = '×';
-    }
-    if (subEl) subEl.textContent = '这首歌暂时播不了，去网易云听吧';
-  });
-
-  items.forEach((item, i) => {
-    const button = item.querySelector('[data-play-song]');
-    if (!button) return;
-    button.addEventListener('click', () => {
-      if (index === i) {
-        if (audio.paused) {
-          const p = audio.play();
-          if (p && p.catch) p.catch(() => {});
-        } else {
-          audio.pause();
-        }
-        return;
-      }
-      load(i, true);
-    });
-  });
-
-  if (toggle) {
-    toggle.addEventListener('click', () => {
-      if (index < 0) {
-        load(0, true);
-        return;
-      }
-      if (audio.paused) {
-        const p = audio.play();
-        if (p && p.catch) p.catch(() => {});
-      } else {
-        audio.pause();
-      }
-    });
-  }
-
-  if (prevBtn) prevBtn.addEventListener('click', () => step(-1));
-  if (nextBtn) nextBtn.addEventListener('click', () => step(1));
-
-  if (seek) {
-    seek.addEventListener('click', (event) => {
-      if (!audio.duration) return;
-      const rect = seek.getBoundingClientRect();
-      const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
-      audio.currentTime = ratio * audio.duration;
-    });
-  }
+  load(songs[0].id, 0);
 }
 
 function initBackdropScene() {

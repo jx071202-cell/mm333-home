@@ -46,32 +46,29 @@ import { hero, playlist } from '../data/site';
       <button class="player__btn" type="button" data-play-prev aria-label="上一首">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 5v14M18 5l-9 7 9 7V5Z" stroke-linejoin="round" /></svg>
       </button>
-      <button class="player__btn player__btn--main" type="button" data-play-toggle aria-label="播放">
-        <svg class="player__icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5Z" /></svg>
-        <svg class="player__icon-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z" /></svg>
-      </button>
       <button class="player__btn" type="button" data-play-next aria-label="下一首">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 5v14M6 5l9 7-9 7V5Z" stroke-linejoin="round" /></svg>
       </button>
     </div>
 
     <div class="player-bar__track">
-      <span class="player__title" data-player-title>选一首开始</span>
-      <span class="player__sub" data-player-sub>点右边列表选歌</span>
+      <span class="player__title" data-player-title>选一首歌</span>
+      <span class="player__sub" data-player-sub>点右边列表，或直接点歌名</span>
     </div>
 
-    <div class="player-bar__progress">
-      <span class="player__time" data-time-current>0:00</span>
-      <div class="player__bar" data-seek>
-        <span class="player__fill" data-progress></span>
-      </div>
-      <span class="player__time" data-time-total>0:00</span>
+    <div class="player-bar__frame-wrap">
+      <iframe
+        class="player-bar__frame"
+        data-player-frame
+        title="网易云音乐播放器"
+        allow="autoplay; encrypted-media"
+        loading="lazy"
+        src="https://music.163.com/outchain/player?type=2&id=483378334&auto=0&height=66"
+      ></iframe>
     </div>
 
     <button class="player-bar__list" type="button" data-toggle-playlist aria-label="播放列表">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h11M4 18h7" stroke-linecap="round" /></svg>
     </button>
-
-    <audio data-audio preload="none"></audio>
   </div>
 </BaseLayout>
