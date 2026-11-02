@@ -32,7 +32,7 @@ export const hero = {
   socials: [
     { label: 'QQ', href: 'https://wpa.qq.com/msgrd?v=3&uin=2621636916&site=qq&menu=yes' },
     { label: 'QQ 空间', href: 'https://user.qzone.qq.com/2621636916' },
-    { label: '邮件', href: 'mailto:2621636916@qq.com' },
+    { label: '网易云', href: 'https://music.163.com/' },
   ],
 };
 
@@ -46,7 +46,6 @@ export const contacts = {
   qqNickname: 'mm333',
   qqAvatar: 'https://q1.qlogo.cn/g?b=qq&nk=2621636916&s=140',
   qqZone: 'https://user.qzone.qq.com/2621636916',
-  email: '2621636916@qq.com',
 };
 
 export const playlist = {
