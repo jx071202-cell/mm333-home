@@ -768,6 +768,10 @@ function initPlayer() {
       event.stopPropagation();
       setOpen(!pop.classList.contains('is-open'));
     });
+    document.querySelector('[data-close-playlist]')?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      setOpen(false);
+    });
     document.addEventListener('click', (event) => {
       if (!pop.contains(event.target) && !listBtn.contains(event.target)) setOpen(false);
     });
@@ -817,21 +821,21 @@ function initChimes() {
     const base = 440 * Math.pow(2, (note - 69) / 12);
 
     const master = ac.createGain();
-    master.gain.value = 0.2;
+    master.gain.value = 0.17;
     master.connect(ac.destination);
 
     const partials = [
-      [1.0, 0.34, 2.8],
-      [2.31, 0.13, 2.0],
-      [3.86, 0.08, 1.5],
-      [5.42, 0.045, 1.05],
-      [7.13, 0.026, 0.7],
+      [1.0, 0.32, 2.8],
+      [2.31, 0.12, 2.0],
+      [3.86, 0.07, 1.5],
+      [5.42, 0.04, 1.05],
+      [7.13, 0.024, 0.7],
     ];
 
     partials.forEach(([ratio, amp, decay], index) => {
       const osc = ac.createOscillator();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(base * ratio * (1 + (Math.random() - 0.5) * 0.005), t0);
+      osc.frequency.setValueAtTime(base * ratio * (1 + (Math.random() - 0.5) * 0.006), t0);
       const gain = ac.createGain();
       const attack = 0.003 + index * 0.0015;
       gain.gain.setValueAtTime(0.0001, t0);
@@ -856,93 +860,56 @@ function initChimes() {
     highpass.type = 'highpass';
     highpass.frequency.value = Math.min(9000, base * 2.2);
     const noiseGain = ac.createGain();
-    noiseGain.gain.value = 0.07;
+    noiseGain.gain.value = 0.06;
     noise.connect(highpass);
     highpass.connect(noiseGain);
     noiseGain.connect(master);
     noise.start(t0);
   };
 
-  const entries = chimes.map((el) => ({
-    el,
-    note: Number(el.dataset.note) || 90,
-    near: false,
-    lastRing: 0,
-    box: null,
-  }));
-
-  const measure = () => {
-    entries.forEach((entry) => {
-      const rect = entry.el.getBoundingClientRect();
-      entry.box = rect.width
-        ? {
-            cx: rect.left + rect.width / 2,
-            cy: rect.top + rect.height * 0.46,
-            radius: Math.max(rect.width * 0.95, 78),
-          }
-        : null;
-    });
-  };
+  const entries = chimes.map((el) => ({ el, note: Number(el.dataset.note) || 90 }));
 
   const ring = (entry) => {
-    const now = performance.now();
-    if (now - entry.lastRing < 550) return;
-    entry.lastRing = now;
     strike(entry.note);
     entry.el.classList.remove('is-ringing');
     void entry.el.offsetWidth;
     entry.el.classList.add('is-ringing');
-    window.setTimeout(() => entry.el.classList.remove('is-ringing'), 2000);
-  };
-
-  const handlePointer = (event) => {
-    const x = event.clientX;
-    const y = event.clientY;
-    if (typeof x !== 'number' || typeof y !== 'number') return;
-    entries.forEach((entry) => {
-      if (!entry.box) return;
-      const dx = x - entry.box.cx;
-      const dy = y - entry.box.cy;
-      const near = Math.hypot(dx, dy) < entry.box.radius;
-      if (near && !entry.near) ring(entry);
-      if (near !== entry.near) {
-        entry.near = near;
-        entry.el.classList.toggle('is-near', near);
-      }
-    });
+    window.setTimeout(() => entry.el.classList.remove('is-ringing'), 2200);
   };
 
   const unlock = () => {
     const ac = ensureContext();
     if (ac && ac.state === 'suspended') ac.resume().catch(() => {});
   };
-
-  measure();
-  window.addEventListener('pointermove', handlePointer, { passive: true });
-  window.addEventListener('pointerdown', handlePointer, { passive: true });
-  window.addEventListener('touchmove', handlePointer, { passive: true });
-  window.addEventListener('resize', measure);
-  window.addEventListener('scroll', measure, { passive: true });
-  document.addEventListener('pointerdown', unlock, { passive: true });
-  document.addEventListener('keydown', unlock, { passive: true });
-
-  entries.forEach((entry) => {
-    const activate = () => {
-      const now = performance.now();
-      if (now - entry.lastRing < 550) return;
-      ring(entry);
-    };
-    entry.el.addEventListener('click', (event) => {
-      event.stopPropagation();
-      activate();
-    });
-    entry.el.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        activate();
-      }
-    });
+  ['pointerdown', 'keydown', 'touchstart'].forEach((type) => {
+    document.addEventListener(type, unlock, { once: true, passive: true });
   });
+
+  if (reduceMotion) return;
+
+  const schedule = () => {
+    const wait = 6000 + Math.random() * 12000;
+    window.setTimeout(() => {
+      if (document.hidden) {
+        schedule();
+        return;
+      }
+      ring(entries[Math.floor(Math.random() * entries.length)]);
+      schedule();
+    }, wait);
+  };
+
+  const startWhenEntered = () => {
+    if (document.documentElement.dataset.entered === '1') {
+      window.setTimeout(() => {
+        ring(entries[0]);
+        schedule();
+      }, 1600);
+      return;
+    }
+    window.setTimeout(startWhenEntered, 500);
+  };
+  startWhenEntered();
 }
 
 function initBackdropScene() {

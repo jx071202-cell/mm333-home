@@ -1,24 +1,22 @@
 ---
 const chimes = [
-  { left: '4.5%', hue: 346, note: 88, delay: '0s', dur: '6.4s' },
-  { left: '12%', hue: 202, note: 91, delay: '1.3s', dur: '7.6s' },
-  { left: '19.5%', hue: 146, note: 94, delay: '2.4s', dur: '5.8s' },
-  { left: '27%', hue: 276, note: 97, delay: '3.1s', dur: '6.9s' },
+  { left: '4.5%', note: 88, delay: '0s', dur: '6.4s' },
+  { left: '12%', note: 91, delay: '1.3s', dur: '7.6s' },
+  { left: '19.5%', note: 94, delay: '2.4s', dur: '5.8s' },
+  { left: '27%', note: 97, delay: '3.1s', dur: '6.9s' },
 ];
 ---
-<div class="chimes">
+<div class="chimes" aria-hidden="true">
   {
     chimes.map((chime) => (
-      <button
+      <div
         class="chime"
-        type="button"
         data-chime
         data-note={chime.note}
-        style={`--left:${chime.left};--hue:${chime.hue};--delay:${chime.delay};--dur:${chime.dur}`}
-        aria-label="风铃，靠近会响"
+        style={`--left:${chime.left};--delay:${chime.delay};--dur:${chime.dur}`}
       >
-        <span class="chime__line" aria-hidden="true"></span>
-        <span class="chime__bell" aria-hidden="true">
+        <span class="chime__line"></span>
+        <span class="chime__bell">
           <svg class="chime__svg" viewBox="0 0 100 110">
             <path d="M50 4c1.5 0 2.6 1.2 2.6 2.6v5h-5.2v-5C47.4 5.2 48.5 4 50 4Z" class="chime__hook" />
             <path
@@ -30,8 +28,8 @@ const chimes = [
           </svg>
           <span class="chime__clapper"></span>
         </span>
-        <span class="chime__strip" aria-hidden="true"></span>
-      </button>
+        <span class="chime__strip"></span>
+      </div>
     ))
   }
 </div>

@@ -23,6 +23,9 @@ import WindChimes from '../components/WindChimes.astro';
 
   <div class="playlist-pop" data-playlist-pop aria-hidden="true">
     <div class="playlist-pop__inner">
+      <button class="playlist-pop__close" type="button" data-close-playlist aria-label="关闭列表">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18" stroke-linecap="round" /></svg>
+      </button>
       <p class="playlist-pop__title">播放列表</p>
       <ul class="playlist">
         {

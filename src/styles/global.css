@@ -3464,3 +3464,77 @@ body.folia-open {
 .folia__body {
   padding-bottom: 120px;
 }
+
+.chime {
+  cursor: default;
+  pointer-events: none;
+}
+
+.chime__hook {
+  fill: rgba(240, 248, 255, 0.9);
+  stroke: rgba(255, 255, 255, 0.75);
+}
+
+.chime__glass {
+  fill: rgba(208, 234, 255, 0.2);
+  stroke: rgba(255, 255, 255, 0.85);
+}
+
+.chime__rim {
+  fill: rgba(208, 234, 255, 0.34);
+  stroke: rgba(255, 255, 255, 0.72);
+}
+
+.chime__clapper {
+  background: radial-gradient(circle at 34% 30%, #ffffff, #aebccd 72%);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+
+.chime__strip {
+  background: linear-gradient(180deg, #fdfaf3 0%, #f4ecdf 46%, #e9ddc9 100%);
+  border-left: 1px solid rgba(255, 255, 255, 0.95);
+  border-right: 1px solid rgba(182, 166, 141, 0.55);
+}
+
+.chime__strip::after {
+  background: rgba(188, 118, 108, 0.5);
+}
+
+.chime.is-near .chime__glass {
+  fill: rgba(208, 234, 255, 0.2);
+  stroke: rgba(255, 255, 255, 0.85);
+}
+
+.playlist-pop {
+  z-index: 140;
+}
+
+.playlist-pop__inner {
+  position: relative;
+}
+
+.playlist-pop__close {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 240, 220, 0.25);
+  color: rgba(255, 240, 220, 0.8);
+  background: rgba(255, 255, 255, 0.06);
+  display: grid;
+  place-items: center;
+  transition: color 0.25s, border-color 0.25s, background 0.25s;
+}
+
+.playlist-pop__close svg {
+  width: 13px;
+  height: 13px;
+}
+
+.playlist-pop__close:hover {
+  color: #fff6ea;
+  border-color: rgba(255, 158, 192, 0.6);
+  background: rgba(255, 158, 192, 0.16);
+}
