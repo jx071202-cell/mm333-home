@@ -1,8 +1,9 @@
 ---
 const chimes = [
-  { left: '4.5%', size: 98, note: 88, delay: '0s', dur: '6.4s' },
-  { left: '12%', size: 78, note: 92, delay: '1.3s', dur: '7.6s' },
-  { left: '19%', size: 62, note: 95, delay: '2.4s', dur: '5.6s' },
+  { left: '4.5%', hue: 346, note: 88, delay: '0s', dur: '6.4s' },
+  { left: '12%', hue: 202, note: 91, delay: '1.3s', dur: '7.6s' },
+  { left: '19.5%', hue: 146, note: 94, delay: '2.4s', dur: '5.8s' },
+  { left: '27%', hue: 276, note: 97, delay: '3.1s', dur: '6.9s' },
 ];
 ---
 <div class="chimes">
@@ -13,23 +14,15 @@ const chimes = [
         type="button"
         data-chime
         data-note={chime.note}
-        style={`--left:${chime.left};--size:${chime.size}px;--delay:${chime.delay};--dur:${chime.dur}`}
-        aria-label="风铃，点击会响"
+        style={`--left:${chime.left};--hue:${chime.hue};--delay:${chime.delay};--dur:${chime.dur}`}
+        aria-label="风铃，靠近会响"
       >
         <span class="chime__line" aria-hidden="true"></span>
         <span class="chime__bell" aria-hidden="true">
           <svg class="chime__svg" viewBox="0 0 100 110">
-            <defs>
-              <radialGradient id={`glassGrad-${chime.note}`} cx="38%" cy="28%" r="72%">
-                <stop offset="0%" stop-color="rgba(235, 248, 255, 0.55)" />
-                <stop offset="55%" stop-color="rgba(175, 220, 255, 0.24)" />
-                <stop offset="100%" stop-color="rgba(120, 175, 230, 0.34)" />
-              </radialGradient>
-            </defs>
             <path d="M50 4c1.5 0 2.6 1.2 2.6 2.6v5h-5.2v-5C47.4 5.2 48.5 4 50 4Z" class="chime__hook" />
             <path
               class="chime__glass"
-              fill={`url(#glassGrad-${chime.note})`}
               d="M50 11c-18 0-31 16-31 37 0 17 7 30 13 36h36c6-6 13-19 13-36 0-21-13-37-31-37Z"
             />
             <ellipse class="chime__rim" cx="50" cy="84" rx="31" ry="5.5" />

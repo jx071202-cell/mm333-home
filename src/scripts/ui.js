@@ -640,30 +640,86 @@ function initChimes() {
     noise.start(t0);
   };
 
+  const entries = chimes.map((el) => ({
+    el,
+    note: Number(el.dataset.note) || 90,
+    near: false,
+    lastRing: 0,
+    box: null,
+  }));
+
+  const measure = () => {
+    entries.forEach((entry) => {
+      const rect = entry.el.getBoundingClientRect();
+      entry.box = rect.width
+        ? {
+            cx: rect.left + rect.width / 2,
+            cy: rect.top + rect.height * 0.46,
+            radius: Math.max(rect.width * 0.95, 78),
+          }
+        : null;
+    });
+  };
+
+  const ring = (entry) => {
+    const now = performance.now();
+    if (now - entry.lastRing < 550) return;
+    entry.lastRing = now;
+    strike(entry.note);
+    entry.el.classList.remove('is-ringing');
+    void entry.el.offsetWidth;
+    entry.el.classList.add('is-ringing');
+    window.setTimeout(() => entry.el.classList.remove('is-ringing'), 2000);
+  };
+
+  let hovering = false;
+
+  const handlePointer = (event) => {
+    const x = event.clientX;
+    const y = event.clientY;
+    if (typeof x !== 'number' || typeof y !== 'number') return;
+    hovering = true;
+    entries.forEach((entry) => {
+      if (!entry.box) return;
+      const dx = x - entry.box.cx;
+      const dy = y - entry.box.cy;
+      const near = Math.hypot(dx, dy) < entry.box.radius;
+      if (near && !entry.near) ring(entry);
+      if (near !== entry.near) {
+        entry.near = near;
+        entry.el.classList.toggle('is-near', near);
+      }
+    });
+  };
+
   const unlock = () => {
     const ac = ensureContext();
     if (ac && ac.state === 'suspended') ac.resume().catch(() => {});
   };
+
+  measure();
+  window.addEventListener('pointermove', handlePointer, { passive: true });
+  window.addEventListener('pointerdown', handlePointer, { passive: true });
+  window.addEventListener('touchmove', handlePointer, { passive: true });
+  window.addEventListener('resize', measure);
+  window.addEventListener('scroll', measure, { passive: true });
   document.addEventListener('pointerdown', unlock, { passive: true });
   document.addEventListener('keydown', unlock, { passive: true });
 
-  chimes.forEach((chime) => {
-    const note = Number(chime.dataset.note) || 90;
-    const ring = () => {
-      strike(note);
-      chime.classList.remove('is-ringing');
-      void chime.offsetWidth;
-      chime.classList.add('is-ringing');
-      window.setTimeout(() => chime.classList.remove('is-ringing'), 2000);
+  entries.forEach((entry) => {
+    const activate = () => {
+      const now = performance.now();
+      if (now - entry.lastRing < 550) return;
+      ring(entry);
     };
-    chime.addEventListener('click', (event) => {
+    entry.el.addEventListener('click', (event) => {
       event.stopPropagation();
-      ring();
+      activate();
     });
-    chime.addEventListener('keydown', (event) => {
+    entry.el.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
-        ring();
+        activate();
       }
     });
   });

@@ -2792,7 +2792,7 @@ body {
   position: absolute;
   top: -6px;
   left: var(--left);
-  width: var(--size);
+  width: var(--chime-size, 84px);
   padding: 0;
   border: 0;
   background: none;
@@ -2800,26 +2800,34 @@ body {
   flex-direction: column;
   align-items: center;
   pointer-events: auto;
-  cursor: pointer;
+  cursor: default;
   transform-origin: 50% 0;
   animation: chime-sway var(--dur) ease-in-out var(--delay) infinite alternate;
   -webkit-tap-highlight-color: transparent;
 }
 
-.chime:hover .chime__glass {
-  fill: rgba(205, 235, 255, 0.26);
-  stroke: rgba(255, 255, 255, 0.9);
+.chime::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: hsl(var(--hue) 100% 92%);
+  box-shadow: 0 0 8px hsl(var(--hue) 100% 80% / 0.9);
 }
 
 .chime:focus-visible {
-  outline: 1px dashed rgba(255, 255, 255, 0.6);
-  outline-offset: 6px;
+  outline: 1px dashed hsl(var(--hue) 100% 86% / 0.8);
+  outline-offset: 8px;
 }
 
 .chime__line {
   width: 1px;
   height: clamp(44px, 9vh, 104px);
-  background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.55));
+  background: linear-gradient(rgba(255, 255, 255, 0), hsl(var(--hue) 100% 92% / 0.75));
 }
 
 .chime__bell {
@@ -2834,28 +2842,34 @@ body {
   width: 100%;
   height: auto;
   overflow: visible;
-  filter: drop-shadow(0 8px 22px rgba(120, 180, 255, 0.35));
+  filter: drop-shadow(0 8px 24px hsl(var(--hue) 90% 62% / 0.42));
+}
+
+.chime__hook {
+  fill: hsl(var(--hue) 90% 90% / 0.9);
+  stroke: hsl(var(--hue) 100% 96% / 0.85);
+  stroke-width: 0.8;
 }
 
 .chime__glass {
-  fill: rgba(190, 225, 255, 0.16);
-  stroke: rgba(240, 250, 255, 0.66);
-  stroke-width: 1.6;
-  transition: fill 0.3s, stroke 0.3s;
+  fill: hsl(var(--hue) 92% 66% / 0.34);
+  stroke: hsl(var(--hue) 100% 92% / 0.92);
+  stroke-width: 2;
+  transition: fill 0.35s, stroke 0.35s;
 }
 
 .chime__rim {
-  fill: rgba(190, 225, 255, 0.3);
-  stroke: rgba(240, 250, 255, 0.55);
+  fill: hsl(var(--hue) 92% 70% / 0.5);
+  stroke: hsl(var(--hue) 100% 95% / 0.8);
   stroke-width: 1;
 }
 
 .chime__shine {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.8);
+  stroke: rgba(255, 255, 255, 0.9);
   stroke-width: 2.6;
   stroke-linecap: round;
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
 .chime__clapper {
@@ -2866,21 +2880,38 @@ body {
   aspect-ratio: 1;
   border-radius: 50%;
   transform: translateX(-50%);
-  background: radial-gradient(circle at 34% 30%, #ffffff, #8ea9c9 72%);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.55);
+  background: radial-gradient(circle at 34% 30%, #ffffff, hsl(var(--hue) 60% 72%) 72%);
+  box-shadow: 0 0 8px hsl(var(--hue) 100% 88% / 0.8);
 }
 
 .chime__strip {
-  width: 30%;
-  height: calc(var(--size) * 0.92);
-  margin-top: 1px;
-  border-radius: 1px 1px 3px 3px;
-  background:
-    linear-gradient(180deg, #f8f3e9 0%, #efe4d1 55%, #e3d5bd 100%);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
+  position: relative;
+  width: 26%;
+  height: calc(var(--chime-size, 84px) * 0.86);
+  border-radius: 1px 1px 4px 4px;
+  background: linear-gradient(180deg, hsl(var(--hue) 100% 98%) 0%, hsl(var(--hue) 55% 92%) 55%, hsl(var(--hue) 45% 86%) 100%);
+  border-left: 1px solid rgba(255, 255, 255, 0.9);
+  border-right: 1px solid hsl(var(--hue) 40% 72% / 0.6);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.32);
   transform-origin: 50% 0;
   animation: strip-wave 4.6s ease-in-out infinite alternate;
-  opacity: 0.92;
+}
+
+.chime__strip::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 14%;
+  width: 40%;
+  height: 6%;
+  transform: translateX(-50%);
+  border-radius: 1px;
+  background: hsl(var(--hue) 70% 55% / 0.65);
+}
+
+.chime.is-near .chime__glass {
+  fill: hsl(var(--hue) 95% 68% / 0.55);
+  stroke: hsl(var(--hue) 100% 98% / 1);
 }
 
 .chime.is-ringing {
@@ -2914,34 +2945,26 @@ body {
 }
 
 @media (max-width: 760px) {
-  .chime:nth-child(3) {
+  .chime {
+    --chime-size: 56px;
+    top: 54px;
+  }
+
+  .chime:nth-child(3),
+  .chime:nth-child(4) {
     display: none;
   }
 
-  .chime {
-    --size: 52px !important;
-  }
-
   .chime:nth-child(1) {
-    --size: 58px !important;
     left: 6% !important;
   }
 
   .chime:nth-child(2) {
-    --size: 46px !important;
-    left: 19% !important;
-  }
-
-  .chime {
-    top: 54px !important;
+    left: 20% !important;
   }
 
   .chime__line {
     height: 30px;
-  }
-
-  .chime__strip {
-    height: calc(var(--size) * 0.9);
   }
 }
 
@@ -3008,4 +3031,11 @@ body {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.85);
   box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+.player-bar__frame {
+  filter: invert(1) hue-rotate(180deg) saturate(0.9) contrast(0.92);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.7);
 }

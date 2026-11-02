@@ -107,8 +107,11 @@ try {
   let shot = await cdp.send('Page.captureScreenshot', { format: 'png' }, sessionId);
   await writeFile(path.join(OUT, 'chimes.png'), Buffer.from(shot.data, 'base64'));
 
-  await evaluate(cdp, sessionId, `document.querySelector('[data-chime]')?.click()`);
-  await sleep(500);
+  const centers = await evaluate(cdp, sessionId, `[...document.querySelectorAll('[data-chime]')].map(el => { const r = el.getBoundingClientRect(); return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height * 0.46) }; })`);
+  if (centers && centers[0]) {
+    await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: centers[0].x, y: centers[0].y, button: 'none' }, sessionId);
+  }
+  await sleep(600);
 
   const after = await evaluate(cdp, sessionId, `({
     contexts: window.__audioContexts ? window.__audioContexts.length : -1,
