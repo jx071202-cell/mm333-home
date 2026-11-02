@@ -27,7 +27,7 @@ import WindChimes from '../components/WindChimes.astro';
       <ul class="playlist">
         {
           playlist.songs.map((song, index) => (
-            <li class="playlist__item" data-song data-index={index} data-id={song.id}>
+            <li class="playlist__item" data-song data-index={index} data-id={song.id} data-cover={song.cover}>
               <button type="button" class="playlist__button" data-play-song={index}>
                 <span class="playlist__idx">{String(index + 1).padStart(2, '0')}</span>
                 <span class="playlist__body">
@@ -44,33 +44,67 @@ import WindChimes from '../components/WindChimes.astro';
   </div>
 
   <div class="player-bar" data-player>
+    <button class="player-bar__cover" type="button" data-folia-open aria-label="展开歌词">
+      <img data-player-cover alt="" src={playlist.songs[0].cover} width="56" height="56" />
+    </button>
+
+    <div class="player-bar__meta">
+      <span class="player__title" data-player-title>{playlist.songs[0].name}</span>
+      <span class="player__sub" data-player-sub>{playlist.songs[0].artist} · {playlist.songs[0].album}</span>
+    </div>
+
     <div class="player-bar__controls">
       <button class="player__btn" type="button" data-play-prev aria-label="上一首">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 5v14M18 5l-9 7 9 7V5Z" stroke-linejoin="round" /></svg>
+      </button>
+      <button class="player__btn player__btn--main" type="button" data-play-toggle aria-label="播放">
+        <svg class="player__icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5Z" /></svg>
+        <svg class="player__icon-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z" /></svg>
       </button>
       <button class="player__btn" type="button" data-play-next aria-label="下一首">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 5v14M6 5l9 7-9 7V5Z" stroke-linejoin="round" /></svg>
       </button>
     </div>
 
-    <div class="player-bar__track">
-      <span class="player__title" data-player-title>选一首歌</span>
-      <span class="player__sub" data-player-sub>点右边列表，或直接点歌名</span>
+    <div class="player-bar__progress">
+      <span class="player__time" data-time-current>0:00</span>
+      <div class="player__bar" data-seek>
+        <span class="player__fill" data-progress></span>
+      </div>
+      <span class="player__time" data-time-total>0:00</span>
     </div>
 
-    <div class="player-bar__frame-wrap">
-      <iframe
-        class="player-bar__frame"
-        data-player-frame
-        title="网易云音乐播放器"
-        allow="autoplay; encrypted-media"
-        loading="lazy"
-        src="https://music.163.com/outchain/player?type=2&id=483378334&auto=0&height=66"
-      ></iframe>
-    </div>
+    <button class="player-bar__icon" type="button" data-player-mute aria-label="静音">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 9v6h4l5 4V5L9 9H5Z" stroke-linejoin="round" /><path d="M16.5 8.5a5 5 0 0 1 0 7" stroke-linecap="round" /></svg>
+    </button>
+
+    <button class="player-bar__icon" type="button" data-folia-open aria-label="歌词">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 7h14M5 12h9M5 17h6" stroke-linecap="round" /></svg>
+    </button>
 
     <button class="player-bar__list" type="button" data-toggle-playlist aria-label="播放列表">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h11M4 18h7" stroke-linecap="round" /></svg>
     </button>
+
+    <audio data-audio preload="none"></audio>
   </div>
+
+  <div class="folia" data-folia aria-hidden="true">
+    <div class="folia__bg" data-folia-bg aria-hidden="true"></div>
+    <div class="folia__scrim" aria-hidden="true"></div>
+
+    <button class="folia__close" type="button" data-folia-close aria-label="收起歌词">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18" stroke-linecap="round" /></svg>
+    </button>
+
+    <div class="folia__body">
+      <img class="folia__cover" data-folia-cover alt="" src={playlist.songs[0].cover} />
+      <p class="folia__title" data-folia-title>{playlist.songs[0].name}</p>
+      <p class="folia__sub" data-folia-sub>{playlist.songs[0].artist} · {playlist.songs[0].album}</p>
+      <div class="folia__lyrics" data-folia-lyrics>
+        <p class="folia__line is-active">点一首歌，开始看歌词</p>
+      </div>
+    </div>
+  </div>
+
 </BaseLayout>

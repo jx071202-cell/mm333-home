@@ -61,12 +61,16 @@ export const playlist = {
       name: '浴室',
       artist: 'deca joins',
       album: '浴室',
+      cover: 'https://p4.music.126.net/byjfkEIOWI_RmxSKEWTPyw==/18910500486297525.jpg',
+      duration: 260,
     },
     {
       id: '22707033',
       name: 'Ana (Short Ver.)',
       artist: 'Lia',
       album: 'CLANNAD ORIGINAL SOUNDTRACK',
+      cover: 'https://p3.music.126.net/kkkPkRGflxLurhhKBbCmPg==/109951171268737495.jpg',
+      duration: 325,
     },
   ],
 };

@@ -481,47 +481,152 @@ function initRainScene() {
 
 function initPlayer() {
   const bar = document.querySelector('[data-player]');
-  const wrap = document.querySelector('.player-bar__frame-wrap');
-  const titleEl = document.querySelector('[data-player-title]');
-  const subEl = document.querySelector('[data-player-sub]');
+  const audio = document.querySelector('[data-audio]');
   const items = [...document.querySelectorAll('[data-song]')];
-  if (!wrap || !items.length) return;
+  const folia = document.querySelector('[data-folia]');
+  if (!audio || !items.length) return;
+
+  const API_BASES = ['https://zm.wwoyun.cn', 'https://zm.i9mr.com'];
+
+  const els = {
+    cover: document.querySelector('[data-player-cover]'),
+    title: document.querySelector('[data-player-title]'),
+    sub: document.querySelector('[data-player-sub]'),
+    timeCurrent: document.querySelector('[data-time-current]'),
+    timeTotal: document.querySelector('[data-time-total]'),
+    seek: document.querySelector('[data-seek]'),
+    progress: document.querySelector('[data-progress]'),
+    toggle: document.querySelector('[data-play-toggle]'),
+    mute: document.querySelector('[data-player-mute]'),
+    foliaCover: document.querySelector('[data-folia-cover]'),
+    foliaBg: document.querySelector('[data-folia-bg]'),
+    foliaTitle: document.querySelector('[data-folia-title]'),
+    foliaSub: document.querySelector('[data-folia-sub]'),
+    foliaLyrics: document.querySelector('[data-folia-lyrics]'),
+  };
 
   const songs = items.map((el) => ({
     id: el.dataset.id,
     name: el.querySelector('.playlist__name')?.textContent.trim() || '',
     meta: el.querySelector('.playlist__meta')?.textContent.trim() || '',
+    cover: el.dataset.cover || '',
   }));
 
   let index = -1;
-  let frame = null;
+  let lines = [];
+  let activeLine = -1;
+  let loadToken = 0;
+  const cache = new Map();
 
-  wrap.querySelectorAll('[data-player-frame]').forEach((el) => el.remove());
-
-  const playerUrl = (id, auto) =>
-    `https://music.163.com/outchain/player?type=2&id=${encodeURIComponent(id)}&auto=${auto}&height=66`;
-
-  const load = (id, auto) => {
-    const next = document.createElement('iframe');
-    next.className = 'player-bar__frame';
-    next.setAttribute('data-player-frame', '');
-    next.title = '网易云音乐播放器';
-    next.allow = 'autoplay; encrypted-media';
-    next.loading = 'eager';
-    next.src = playerUrl(id, auto);
-    if (frame) frame.replaceWith(next);
-    else wrap.appendChild(next);
-    frame = next;
+  const formatTime = (seconds) => {
+    if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+    const total = Math.floor(seconds);
+    const m = Math.floor(total / 60);
+    const sec = String(total % 60).padStart(2, '0');
+    return `${m}:${sec}`;
   };
 
-  const select = (next, autoplay) => {
-    if (!songs[next]) return;
-    index = next;
-    const song = songs[next];
-    load(song.id, autoplay ? 1 : 0);
-    if (titleEl) titleEl.textContent = song.name;
-    if (subEl) subEl.textContent = song.meta;
-    if (bar) bar.classList.add('is-playing');
+  const parseLrc = (text) => {
+    const result = [];
+    if (!text) return result;
+    text.split(/\r?\n/).forEach((raw) => {
+      const matches = [...raw.matchAll(/\[(\d{1,3}):(\d{1,2})(?:[.:](\d{1,3}))?\]/g)];
+      const content = raw.replace(/\[[^\]]*\]/g, '').trim();
+      if (!matches.length || !content) return;
+      matches.forEach((match) => {
+        const minutes = Number(match[1]);
+        const seconds = Number(match[2]);
+        const fraction = match[3] ? Number(`0.${match[3]}`) : 0;
+        result.push({ time: minutes * 60 + seconds + fraction, text: content });
+      });
+    });
+    return result.sort((a, b) => a.time - b.time);
+  };
+
+  const fetchJson = async (url) => {
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 9000);
+    try {
+      const response = await fetch(url, { signal: controller.signal, mode: 'cors' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
+    } finally {
+      window.clearTimeout(timer);
+    }
+  };
+
+  const resolveStream = (song) => {
+    if (cache.has(song.id)) return cache.get(song.id);
+    const task = (async () => {
+      for (const base of API_BASES) {
+        try {
+          const [urlRes, lyricRes] = await Promise.all([
+            fetchJson(`${base}/song/url?id=${encodeURIComponent(song.id)}&br=128000`),
+            fetchJson(`${base}/lyric?id=${encodeURIComponent(song.id)}`).catch(() => null),
+          ]);
+          const rawUrl = urlRes?.data?.[0]?.url;
+          if (!rawUrl) continue;
+          return { url: rawUrl.replace(/^http:/, 'https:'), lrc: lyricRes?.lrc?.lyric || '' };
+        } catch (error) {
+          continue;
+        }
+      }
+      return null;
+    })();
+    cache.set(song.id, task);
+    return task;
+  };
+
+  const renderLyrics = () => {
+    if (!els.foliaLyrics) return;
+    els.foliaLyrics.innerHTML = '';
+    const lineNodes = lines.map((line) => {
+      const p = document.createElement('p');
+      p.className = 'folia__line';
+      p.textContent = line.text;
+      els.foliaLyrics.appendChild(p);
+      return p;
+    });
+    if (!lines.length) {
+      const p = document.createElement('p');
+      p.className = 'folia__line is-active';
+      p.textContent = '这首歌暂时没有歌词';
+      els.foliaLyrics.appendChild(p);
+      lineNodes.push(p);
+    }
+    els.foliaLyrics.__nodes = lineNodes;
+    activeLine = -1;
+  };
+
+  const scrollLyrics = (target) => {
+    if (!els.foliaLyrics || !target) return;
+    const box = els.foliaLyrics;
+    const offset = target.offsetTop - box.clientHeight / 2 + target.offsetHeight / 2;
+    box.scrollTo({ top: Math.max(0, offset), behavior: 'smooth' });
+  };
+
+  const setActiveLine = (next) => {
+    const nodes = els.foliaLyrics?.__nodes;
+    if (!nodes || next === activeLine) return;
+    nodes.forEach((node, i) => {
+      node.classList.toggle('is-active', i === next);
+      node.classList.toggle('is-near', Math.abs(i - next) === 1);
+    });
+    activeLine = next;
+    if (next >= 0) scrollLyrics(nodes[next]);
+  };
+
+  const syncLyrics = (time) => {
+    if (!lines.length) return;
+    let next = -1;
+    for (let i = 0; i < lines.length; i += 1) {
+      if (lines[i].time <= time + 0.15) next = i;
+      else break;
+    }
+    setActiveLine(next);
+  };
+
+  const setActiveItem = (next) => {
     items.forEach((el, i) => {
       el.classList.toggle('is-active', i === next);
       const state = el.querySelector('[data-state]');
@@ -529,10 +634,80 @@ function initPlayer() {
     });
   };
 
-  items.forEach((el) => {
-    el.querySelector('[data-play-song]')?.addEventListener('click', () => {
-      select(Number(el.dataset.index), true);
-    });
+  const applySong = (song) => {
+    if (els.cover && song.cover) els.cover.src = song.cover;
+    if (els.foliaCover && song.cover) els.foliaCover.src = song.cover;
+    if (els.foliaBg && song.cover) els.foliaBg.style.backgroundImage = `url("${song.cover}")`;
+    if (els.title) els.title.textContent = song.name;
+    if (els.sub) els.sub.textContent = song.meta;
+    if (els.foliaTitle) els.foliaTitle.textContent = song.name;
+    if (els.foliaSub) els.foliaSub.textContent = song.meta;
+    if (els.timeTotal) els.timeTotal.textContent = '0:00';
+    if (els.timeCurrent) els.timeCurrent.textContent = '0:00';
+    if (els.progress) els.progress.style.width = '0%';
+  };
+
+  const select = async (next, autoplay) => {
+    if (next < 0 || next >= songs.length) return;
+    index = next;
+    const song = songs[next];
+    const token = ++loadToken;
+    applySong(song);
+    setActiveItem(next);
+    lines = [];
+    renderLyrics();
+    audio.pause();
+    audio.removeAttribute('src');
+    audio.load();
+
+    const result = await resolveStream(song);
+    if (token !== loadToken) return;
+    if (!result || !result.url) {
+      if (els.sub) els.sub.textContent = '接口暂时不可用 · 稍后再试';
+      return;
+    }
+    lines = parseLrc(result.lrc);
+    renderLyrics();
+    audio.src = result.url;
+    audio.load();
+    if (autoplay) audio.play().catch(() => {});
+  };
+
+  const updatePlayState = () => {
+    if (!bar) return;
+    const playing = !audio.paused && !audio.ended;
+    bar.classList.toggle('is-playing', playing);
+    if (els.toggle) els.toggle.setAttribute('aria-label', playing ? '暂停' : '播放');
+  };
+
+  audio.addEventListener('timeupdate', () => {
+    const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+    if (els.timeCurrent) els.timeCurrent.textContent = formatTime(audio.currentTime);
+    if (els.timeTotal) els.timeTotal.textContent = formatTime(duration);
+    if (els.progress && duration > 0) {
+      els.progress.style.width = `${Math.min(100, (audio.currentTime / duration) * 100)}%`;
+    }
+    syncLyrics(audio.currentTime);
+  });
+
+  audio.addEventListener('play', updatePlayState);
+  audio.addEventListener('pause', updatePlayState);
+  audio.addEventListener('ended', () => {
+    updatePlayState();
+    select((index + 1) % songs.length, true);
+  });
+  audio.addEventListener('error', () => {
+    if (els.sub) els.sub.textContent = '播放失败 · 试试下一首';
+    updatePlayState();
+  });
+
+  els.toggle?.addEventListener('click', () => {
+    if (index === -1) {
+      select(0, true);
+      return;
+    }
+    if (audio.paused) audio.play().catch(() => {});
+    else audio.pause();
   });
 
   document.querySelector('[data-play-prev]')?.addEventListener('click', () => {
@@ -541,6 +716,44 @@ function initPlayer() {
 
   document.querySelector('[data-play-next]')?.addEventListener('click', () => {
     select((index + 1) % songs.length, true);
+  });
+
+  items.forEach((el) => {
+    el.querySelector('[data-play-song]')?.addEventListener('click', () => {
+      select(Number(el.dataset.index), true);
+    });
+  });
+
+  els.seek?.addEventListener('pointerdown', (event) => {
+    if (!Number.isFinite(audio.duration) || !audio.duration) return;
+    const rect = els.seek.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+    audio.currentTime = ratio * audio.duration;
+  });
+
+  els.mute?.addEventListener('click', () => {
+    audio.muted = !audio.muted;
+    els.mute.classList.toggle('is-muted', audio.muted);
+    els.mute.setAttribute('aria-label', audio.muted ? '取消静音' : '静音');
+  });
+
+  const setFoliaOpen = (open) => {
+    if (!folia) return;
+    folia.classList.toggle('is-open', open);
+    folia.setAttribute('aria-hidden', String(!open));
+    document.body.classList.toggle('folia-open', open);
+    if (open && activeLine >= 0) {
+      const nodes = els.foliaLyrics?.__nodes;
+      if (nodes && nodes[activeLine]) scrollLyrics(nodes[activeLine]);
+    }
+  };
+
+  document.querySelectorAll('[data-folia-open]').forEach((button) =>
+    button.addEventListener('click', () => setFoliaOpen(true))
+  );
+  document.querySelector('[data-folia-close]')?.addEventListener('click', () => setFoliaOpen(false));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') setFoliaOpen(false);
   });
 
   const pop = document.querySelector('[data-playlist-pop]');
@@ -563,7 +776,17 @@ function initPlayer() {
     });
   }
 
-  load(songs[0].id, 0);
+  const first = songs[0];
+  if (first) {
+    if (els.cover && first.cover) els.cover.src = first.cover;
+    if (els.foliaCover && first.cover) els.foliaCover.src = first.cover;
+    if (els.foliaBg && first.cover) els.foliaBg.style.backgroundImage = `url("${first.cover}")`;
+    if (els.title) els.title.textContent = first.name;
+    if (els.sub) els.sub.textContent = first.meta;
+    if (els.foliaTitle) els.foliaTitle.textContent = first.name;
+    if (els.foliaSub) els.foliaSub.textContent = first.meta;
+  }
+  updatePlayState();
 }
 
 function initChimes() {
@@ -672,13 +895,10 @@ function initChimes() {
     window.setTimeout(() => entry.el.classList.remove('is-ringing'), 2000);
   };
 
-  let hovering = false;
-
   const handlePointer = (event) => {
     const x = event.clientX;
     const y = event.clientY;
     if (typeof x !== 'number' || typeof y !== 'number') return;
-    hovering = true;
     entries.forEach((entry) => {
       if (!entry.box) return;
       const dx = x - entry.box.cx;
