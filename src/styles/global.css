@@ -3722,3 +3722,48 @@ body.folia-open {
     width: clamp(84px, 8vw, 120px);
   }
 }
+
+.chime__tanzaku {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  margin-top: 3px;
+  padding: 6px 4px;
+  font-family: 'Yu Mincho', 'Hiragino Mincho ProN', 'Noto Serif JP', 'Songti SC', serif;
+  font-size: 9px;
+  line-height: 1.1;
+  letter-spacing: 0.14em;
+  color: #2b2320;
+  background: linear-gradient(180deg, #fffdf7 0%, #f5efe2 70%, #ece1cd 100%);
+  border-radius: 1px;
+  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.4);
+  opacity: 0.95;
+}
+
+.chime__wood {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  margin-top: 3px;
+  padding: 7px 4px;
+  font-family: 'Yu Mincho', 'Hiragino Mincho ProN', 'Noto Serif JP', 'Songti SC', serif;
+  font-size: 9px;
+  line-height: 1.15;
+  letter-spacing: 0.16em;
+  color: #3c2a17;
+  background:
+    linear-gradient(180deg, #e0c191 0%, #d3ad74 45%, #c39858 100%);
+  border: 1px solid rgba(96, 64, 30, 0.45);
+  border-radius: 2px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+}
+
+.chime__tanzaku {
+  font-size: 10.5px;
+  padding: 8px 5px;
+  letter-spacing: 0.18em;
+}
+
+.chime__wood {
+  font-size: 11px;
+  padding: 9px 5px;
+  letter-spacing: 0.2em;
+}

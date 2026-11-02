@@ -5,6 +5,11 @@ const shapes = ['drop', 'disc', 'star', 'flower', 'leaf', 'disc', 'drop', 'flowe
 const LEN = 46;
 const SIZE = 30;
 
+const words = [
+  '夏の風', '涼しい', '雨の日', 'ありがとう', 'またね', '蝉の声',
+  '夕凪', '花火', '風鈴', '水の音', 'おはよう', '日々是好日',
+];
+
 const items = Array.from({ length: 12 }, (_, i) => ({
   left: `${2.2 + i * 7.9}%`,
   hue: palette[i % palette.length],
@@ -14,6 +19,8 @@ const items = Array.from({ length: 12 }, (_, i) => ({
   note: 96 + (i % 6) * 2,
   delay: `${(i * 0.47).toFixed(2)}s`,
   dur: '6.2s',
+  word: words[i],
+  wood: i === 11,
 }));
 ---
 <div class="chimes" aria-hidden="true">
@@ -59,6 +66,11 @@ const items = Array.from({ length: 12 }, (_, i) => ({
             </svg>
           )}
         </span>
+        {item.wood ? (
+          <span class="chime__wood">{item.word}</span>
+        ) : (
+          <span class="chime__tanzaku">{item.word}</span>
+        )}
       </div>
     ))
   }
