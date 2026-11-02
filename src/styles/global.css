@@ -3538,3 +3538,99 @@ body.folia-open {
   border-color: rgba(255, 158, 192, 0.6);
   background: rgba(255, 158, 192, 0.16);
 }
+
+.chimes {
+  height: 46vh;
+  overflow: visible;
+}
+
+.chime {
+  top: -4px;
+  width: var(--size);
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  cursor: default;
+}
+
+.chime__thread {
+  width: 1px;
+  height: var(--len);
+  background: linear-gradient(rgba(255, 255, 255, 0.06), hsl(var(--hue) 85% 92% / 0.75));
+}
+
+.chime__beads {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  margin-top: -1px;
+  margin-bottom: 2px;
+}
+
+.chime__beads i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: hsl(var(--hue) 85% 86% / 0.85);
+  box-shadow: 0 0 5px hsl(var(--hue) 90% 80% / 0.6);
+}
+
+.chime__pendant {
+  display: block;
+  width: var(--size);
+  height: calc(var(--size) * 1.2);
+  filter: drop-shadow(0 4px 12px hsl(var(--hue) 75% 62% / 0.4));
+}
+
+.chime__pendant svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.chime__pendant path,
+.chime__pendant circle {
+  fill: hsl(var(--hue) 78% 72% / 0.5);
+  stroke: hsl(var(--hue) 95% 94% / 0.9);
+  stroke-width: 1.3;
+  stroke-linejoin: round;
+}
+
+.chime__pendant .chime__shine {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.85);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
+
+.chime.is-ringing {
+  animation: chime-ring 0.62s ease-in-out 3;
+}
+
+@media (max-width: 760px) {
+  .chime {
+    top: 48px;
+  }
+
+  .chime:nth-child(n + 9) {
+    display: none;
+  }
+
+  .chime__pendant {
+    height: calc(var(--size) * 1.15);
+  }
+}
+
+.chime__pendant {
+  filter: drop-shadow(0 5px 14px hsl(var(--hue) 80% 66% / 0.5));
+}
+
+.chime__pendant path,
+.chime__pendant circle {
+  fill: hsl(var(--hue) 82% 74% / 0.62);
+  stroke: hsl(var(--hue) 100% 96% / 0.95);
+  stroke-width: 1.4;
+}
