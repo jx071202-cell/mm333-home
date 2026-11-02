@@ -1,16 +1,19 @@
 ---
 const palette = [202, 330, 282, 45, 150, 18, 262, 190, 320, 95, 220, 350];
-const shapes = ['drop', 'disc', 'star', 'flower', 'leaf', 'drop', 'star', 'disc', 'flower', 'leaf', 'drop', 'disc'];
+
+const LEN = 46;
+const SIZE = 30;
+const SHAPE = 'drop';
 
 const items = Array.from({ length: 12 }, (_, i) => ({
   left: `${2.2 + i * 7.9}%`,
   hue: palette[i % palette.length],
-  shape: shapes[i % shapes.length],
-  len: [30, 52, 38, 70, 44, 56, 34, 78, 48, 62, 40, 54][i],
-  size: [34, 26, 30, 24, 28, 36, 26, 22, 32, 26, 34, 24][i],
+  len: LEN,
+  size: SIZE,
+  shape: SHAPE,
   note: 96 + (i % 6) * 2,
   delay: `${(i * 0.47).toFixed(2)}s`,
-  dur: `${(5.4 + (i % 5) * 0.8).toFixed(2)}s`,
+  dur: '6.2s',
 }));
 ---
 <div class="chimes" aria-hidden="true">
@@ -25,36 +28,10 @@ const items = Array.from({ length: 12 }, (_, i) => ({
         <span class="chime__thread"></span>
         <span class="chime__beads"><i></i><i></i><i></i></span>
         <span class="chime__pendant">
-          {item.shape === 'drop' && (
-            <svg viewBox="0 0 40 48">
-              <path d="M20 3c8 10 14 17 14 26a14 14 0 0 1-28 0C6 20 12 13 20 3Z" />
-              <path class="chime__shine" d="M14 20c2-4 6-6 9-5" />
-            </svg>
-          )}
-          {item.shape === 'disc' && (
-            <svg viewBox="0 0 40 40">
-              <circle cx="20" cy="20" r="16" />
-              <path class="chime__shine" d="M12 14c3-4 8-5 11-4" />
-            </svg>
-          )}
-          {item.shape === 'star' && (
-            <svg viewBox="0 0 40 40">
-              <path d="M20 3l4.6 10.8L36 15l-8.6 7.6L30 35l-10-5.6L10 35l2.6-12.4L4 15l11.4-1.2Z" />
-              <path class="chime__shine" d="M15 14c3-2 6-2 9 0" />
-            </svg>
-          )}
-          {item.shape === 'flower' && (
-            <svg viewBox="0 0 44 44">
-              <path d="M22 4c3 5 3 7 0 9-3-2-3-4 0-9ZM40 22c-5 3-7 3-9 0 2-3 4-3 9 0ZM22 40c-3-5-3-7 0-9 3 2 3 4 0 9ZM4 22c5-3 7-3 9 0-2 3-4 3-9 0Z" />
-              <path d="M22 12c4 4 6 6 10 10-4 4-6 6-10 10-4-4-6-6-10-10 4-4 6-6 10-10Z" />
-            </svg>
-          )}
-          {item.shape === 'leaf' && (
-            <svg viewBox="0 0 40 48">
-              <path d="M20 44C8 34 6 18 20 4c14 14 12 30 0 40Z" />
-              <path class="chime__shine" d="M20 14v22" />
-            </svg>
-          )}
+          <svg viewBox="0 0 40 48">
+            <path d="M20 3c8 10 14 17 14 26a14 14 0 0 1-28 0C6 20 12 13 20 3Z" />
+            <path class="chime__shine" d="M14 20c2-4 6-6 9-5" />
+          </svg>
         </span>
       </div>
     ))
