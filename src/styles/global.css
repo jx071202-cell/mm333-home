@@ -3695,3 +3695,30 @@ body.folia-open {
     display: none;
   }
 }
+
+.side-art--right img:nth-child(3) {
+  animation-delay: 2.2s;
+  transform: rotate(-1.6deg);
+}
+
+.side-art {
+  width: clamp(92px, 9.6vw, 150px);
+  gap: clamp(8px, 1.3vh, 14px);
+}
+
+.side-art--left img:nth-child(3) {
+  animation-delay: 2.6s;
+  transform: rotate(1.4deg);
+}
+
+.side-art--right img:nth-child(4) {
+  animation-delay: 3.1s;
+  transform: rotate(-2deg);
+  background: #fff;
+}
+
+@media (max-width: 1280px) {
+  .side-art {
+    width: clamp(84px, 8vw, 120px);
+  }
+}
