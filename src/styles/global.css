@@ -2919,7 +2919,29 @@ body {
   }
 
   .chime {
-    --size: calc(var(--size) * 0.78);
+    --size: 52px !important;
+  }
+
+  .chime:nth-child(1) {
+    --size: 58px !important;
+    left: 6% !important;
+  }
+
+  .chime:nth-child(2) {
+    --size: 46px !important;
+    left: 19% !important;
+  }
+
+  .chime {
+    top: 54px !important;
+  }
+
+  .chime__line {
+    height: 30px;
+  }
+
+  .chime__strip {
+    height: calc(var(--size) * 0.9);
   }
 }
 

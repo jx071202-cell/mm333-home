@@ -6,6 +6,8 @@ const EDGE = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
 const PORT = 9344;
 const OUT = path.resolve(process.argv[2] ?? 'shots');
 const BASE = process.argv[3] ?? 'http://127.0.0.1:4328';
+const VW = Number(process.env.VW ?? 1440);
+const VH = Number(process.env.VH ?? 900);
 
 await mkdir(OUT, { recursive: true });
 
@@ -88,7 +90,7 @@ try {
       })();
     `,
   }, sessionId);
-  await cdp.send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false }, sessionId);
+  await cdp.send('Emulation.setDeviceMetricsOverride', { width: VW, height: VH, deviceScaleFactor: 1, mobile: VW < 700 }, sessionId);
   await cdp.send('Page.navigate', { url: BASE + '/' }, sessionId);
   await sleep(6500);
 
