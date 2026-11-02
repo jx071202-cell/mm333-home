@@ -116,12 +116,16 @@ try {
   await evaluate(cdp, sessionId, `document.querySelector('[data-play-song="0"]')?.click()`);
   await sleep(4500);
   const playerState = await evaluate(cdp, sessionId, `(() => {
-    const a = document.querySelector('[data-audio]');
+    const f = document.querySelector('[data-player-frame]');
+    const bar = document.querySelector('.player-bar');
     return {
-      paused: a?.paused, currentTime: a?.currentTime, duration: a?.duration,
-      error: a?.error ? a.error.code : null,
+      iframe: !!f,
+      src: f ? f.src : null,
       title: document.querySelector('[data-player-title]')?.textContent,
-      bar: document.querySelector('.player-bar')?.className,
+      sub: document.querySelector('[data-player-sub]')?.textContent,
+      bar: bar?.className,
+      barRect: bar ? (() => { const r = bar.getBoundingClientRect(); return { top: Math.round(r.top), bottom: Math.round(r.bottom) }; })() : null,
+      active: document.querySelectorAll('.playlist__item.is-active').length,
     };
   })()`);
   console.log('player:', JSON.stringify(playerState));

@@ -1,9 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { hero, playlist } from '../data/site';
+import WindChimes from '../components/WindChimes.astro';
 ---
 <BaseLayout>
   <section class="hero hero--center" id="top">
+    <WindChimes />
     <div class="hero__center">
       <img class="hero__avatar" src={hero.avatar} alt="mm333 的头像" />
       <p class="hero__greeting">{hero.greeting}</p>

@@ -2777,3 +2777,213 @@ body {
   display:block;
   flex:none;
 }
+
+.chimes {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: min(72vh, 660px);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.chime {
+  position: absolute;
+  top: -6px;
+  left: var(--left);
+  width: var(--size);
+  padding: 0;
+  border: 0;
+  background: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: auto;
+  cursor: pointer;
+  transform-origin: 50% 0;
+  animation: chime-sway var(--dur) ease-in-out var(--delay) infinite alternate;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chime:hover .chime__glass {
+  fill: rgba(205, 235, 255, 0.26);
+  stroke: rgba(255, 255, 255, 0.9);
+}
+
+.chime:focus-visible {
+  outline: 1px dashed rgba(255, 255, 255, 0.6);
+  outline-offset: 6px;
+}
+
+.chime__line {
+  width: 1px;
+  height: clamp(44px, 9vh, 104px);
+  background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.55));
+}
+
+.chime__bell {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 100 / 110;
+}
+
+.chime__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 8px 22px rgba(120, 180, 255, 0.35));
+}
+
+.chime__glass {
+  fill: rgba(190, 225, 255, 0.16);
+  stroke: rgba(240, 250, 255, 0.66);
+  stroke-width: 1.6;
+  transition: fill 0.3s, stroke 0.3s;
+}
+
+.chime__rim {
+  fill: rgba(190, 225, 255, 0.3);
+  stroke: rgba(240, 250, 255, 0.55);
+  stroke-width: 1;
+}
+
+.chime__shine {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.8);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+
+.chime__clapper {
+  position: absolute;
+  left: 50%;
+  top: 62%;
+  width: 9%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(circle at 34% 30%, #ffffff, #8ea9c9 72%);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.55);
+}
+
+.chime__strip {
+  width: 30%;
+  height: calc(var(--size) * 0.92);
+  margin-top: 1px;
+  border-radius: 1px 1px 3px 3px;
+  background:
+    linear-gradient(180deg, #f8f3e9 0%, #efe4d1 55%, #e3d5bd 100%);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
+  transform-origin: 50% 0;
+  animation: strip-wave 4.6s ease-in-out infinite alternate;
+  opacity: 0.92;
+}
+
+.chime.is-ringing {
+  animation: chime-ring 0.62s ease-in-out 3;
+}
+
+@keyframes chime-sway {
+  from {
+    transform: rotate(-3.2deg);
+  }
+  to {
+    transform: rotate(3.2deg);
+  }
+}
+
+@keyframes chime-ring {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(9deg); }
+  50% { transform: rotate(-7deg); }
+  75% { transform: rotate(4.5deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes strip-wave {
+  from {
+    transform: rotate(-7deg) skewX(-3deg);
+  }
+  to {
+    transform: rotate(6deg) skewX(3deg);
+  }
+}
+
+@media (max-width: 760px) {
+  .chime:nth-child(3) {
+    display: none;
+  }
+
+  .chime {
+    --size: calc(var(--size) * 0.78);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chime,
+  .chime__strip {
+    animation: none !important;
+  }
+}
+
+.chime__hook {
+  fill: rgba(235, 246, 255, 0.75);
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 0.8;
+}
+
+.chime__glass {
+  stroke: rgba(245, 252, 255, 0.85);
+  stroke-width: 2;
+}
+
+.chime__rim {
+  fill: rgba(210, 236, 255, 0.4);
+  stroke: rgba(245, 252, 255, 0.65);
+}
+
+.chime__strip {
+  width: 26%;
+  height: calc(var(--size) * 0.86);
+  margin-top: 0;
+  border-radius: 1px 1px 4px 4px;
+  background:
+    linear-gradient(180deg, #fffdf8 0%, #f6efe2 30%, #efe6d6 100%);
+  border-left: 1px solid rgba(255, 255, 255, 0.9);
+  border-right: 1px solid rgba(190, 175, 150, 0.55);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  opacity: 1;
+}
+
+.chime__strip::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 14%;
+  width: 40%;
+  height: 6%;
+  transform: translateX(-50%);
+  border-radius: 1px;
+  background: rgba(198, 92, 92, 0.55);
+}
+
+.chime__strip {
+  position: relative;
+}
+
+.chime::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}

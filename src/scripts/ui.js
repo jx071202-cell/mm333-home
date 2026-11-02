@@ -8,6 +8,7 @@ export function initUI() {
   initLightbox();
   initCopy();
   initBackdropScene();
+  initChimes();
   initPlayer();
 }
 
@@ -563,6 +564,109 @@ function initPlayer() {
   }
 
   load(songs[0].id, 0);
+}
+
+function initChimes() {
+  const chimes = [...document.querySelectorAll('[data-chime]')];
+  if (!chimes.length) return;
+
+  let ctx = null;
+
+  const ensureContext = () => {
+    if (!ctx) {
+      const AudioCtor = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtor) return null;
+      ctx = new AudioCtor();
+    }
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+    return ctx;
+  };
+
+  const strike = async (note) => {
+    const ac = ensureContext();
+    if (!ac) return;
+    if (ac.state !== 'running') {
+      try {
+        await ac.resume();
+      } catch (e) {}
+    }
+    const t0 = ac.currentTime + 0.012;
+    const base = 440 * Math.pow(2, (note - 69) / 12);
+
+    const master = ac.createGain();
+    master.gain.value = 0.2;
+    master.connect(ac.destination);
+
+    const partials = [
+      [1.0, 0.34, 2.8],
+      [2.31, 0.13, 2.0],
+      [3.86, 0.08, 1.5],
+      [5.42, 0.045, 1.05],
+      [7.13, 0.026, 0.7],
+    ];
+
+    partials.forEach(([ratio, amp, decay], index) => {
+      const osc = ac.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(base * ratio * (1 + (Math.random() - 0.5) * 0.005), t0);
+      const gain = ac.createGain();
+      const attack = 0.003 + index * 0.0015;
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(amp, t0 + attack);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + decay);
+      osc.connect(gain);
+      gain.connect(master);
+      osc.start(t0);
+      osc.stop(t0 + decay + 0.05);
+    });
+
+    const length = Math.floor(ac.sampleRate * 0.035);
+    const buffer = ac.createBuffer(1, length, ac.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < length; i += 1) {
+      const fall = Math.pow(1 - i / length, 4);
+      data[i] = (Math.random() * 2 - 1) * fall;
+    }
+    const noise = ac.createBufferSource();
+    noise.buffer = buffer;
+    const highpass = ac.createBiquadFilter();
+    highpass.type = 'highpass';
+    highpass.frequency.value = Math.min(9000, base * 2.2);
+    const noiseGain = ac.createGain();
+    noiseGain.gain.value = 0.07;
+    noise.connect(highpass);
+    highpass.connect(noiseGain);
+    noiseGain.connect(master);
+    noise.start(t0);
+  };
+
+  const unlock = () => {
+    const ac = ensureContext();
+    if (ac && ac.state === 'suspended') ac.resume().catch(() => {});
+  };
+  document.addEventListener('pointerdown', unlock, { passive: true });
+  document.addEventListener('keydown', unlock, { passive: true });
+
+  chimes.forEach((chime) => {
+    const note = Number(chime.dataset.note) || 90;
+    const ring = () => {
+      strike(note);
+      chime.classList.remove('is-ringing');
+      void chime.offsetWidth;
+      chime.classList.add('is-ringing');
+      window.setTimeout(() => chime.classList.remove('is-ringing'), 2000);
+    };
+    chime.addEventListener('click', (event) => {
+      event.stopPropagation();
+      ring();
+    });
+    chime.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        ring();
+      }
+    });
+  });
 }
 
 function initBackdropScene() {
