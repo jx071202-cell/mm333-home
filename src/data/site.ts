@@ -37,11 +37,16 @@ export const hero = {
 };
 
 export const nav = [
-  { id: 'top', label: '首页', panel: null },
+  { id: 'top', label: '首页', href: '/' },
   { id: 'songs', label: '我的歌单', panel: 'playlist' },
-  { id: 'shuoshuo', label: '说说', panel: 'shuoshuo' },
+  { id: 'shuoshuo', label: '说说', href: '/shuoshuo/' },
   { id: 'fortune', label: '每日占卜', panel: 'fortune' },
 ];
+
+export const github = {
+  repo: 'jx071202-cell/mm333-home',
+  issuesUrl: 'https://api.github.com/repos/jx071202-cell/mm333-home/issues?state=all&per_page=50',
+};
 
 export const shuoshuo = [
   { date: '2026-11-03', text: '风铃今天自己响了好几次，像是有谁路过。' },

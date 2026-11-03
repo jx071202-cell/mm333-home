@@ -1,9 +1,10 @@
 ---
 import { nav, site } from '../data/site';
+import { withBase } from '../lib/paths';
 ---
 <header class="topbar">
   <div class="topbar__inner">
-    <a class="topbar__brand" href="#top" aria-label={`${site.name} 首页`}>
+    <a class="topbar__brand" href={withBase('/')} aria-label={`${site.name} 首页`}>
       <span class="topbar__mark" aria-hidden="true"></span>
       <span class="topbar__name">{site.name}</span>
       <span class="topbar__sub">的小窝</span>
@@ -15,7 +16,7 @@ import { nav, site } from '../data/site';
           item.panel ? (
             <button class="topbar__nav-btn" type="button" data-open-panel={item.panel}>{item.label}</button>
           ) : (
-            <a href={`#${item.id}`} data-nav-link={item.id}>{item.label}</a>
+            <a href={withBase(item.href ?? `/#${item.id}`)}>{item.label}</a>
           )
         )
       }

@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { fortune, hero, playlist, shuoshuo } from '../data/site';
+import { fortune, hero, playlist } from '../data/site';
 import WindChimes from '../components/WindChimes.astro';
 import { withBase } from '../lib/paths';
 ---
@@ -51,25 +51,6 @@ import { withBase } from '../lib/paths';
                 </span>
                 <span class="playlist__state" data-state aria-hidden="true">▶</span>
               </button>
-            </li>
-          ))
-        }
-      </ul>
-    </div>
-  </div>
-
-  <div class="panel-pop" data-panel="shuoshuo" aria-hidden="true">
-    <div class="panel-pop__inner">
-      <button class="panel-pop__close" type="button" data-close-panel aria-label="关闭说说">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18" stroke-linecap="round" /></svg>
-      </button>
-      <p class="panel-pop__title">说说</p>
-      <ul class="shuo">
-        {
-          shuoshuo.map((item) => (
-            <li class="shuo__item">
-              <span class="shuo__date">{item.date}</span>
-              <p class="shuo__text">{item.text}</p>
             </li>
           ))
         }
