@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { hero, playlist } from '../data/site';
+import { fortune, hero, playlist, shuoshuo } from '../data/site';
 import WindChimes from '../components/WindChimes.astro';
 import { withBase } from '../lib/paths';
 ---
@@ -33,9 +33,9 @@ import { withBase } from '../lib/paths';
     </div>
   </section>
 
-  <div class="playlist-pop" data-playlist-pop aria-hidden="true">
+  <div class="playlist-pop panel-pop" data-playlist-pop data-panel="playlist" aria-hidden="true">
     <div class="playlist-pop__inner">
-      <button class="playlist-pop__close" type="button" data-close-playlist aria-label="关闭列表">
+      <button class="playlist-pop__close" type="button" data-close-playlist data-close-panel aria-label="关闭列表">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18" stroke-linecap="round" /></svg>
       </button>
       <p class="playlist-pop__title">播放列表</p>
@@ -55,6 +55,40 @@ import { withBase } from '../lib/paths';
           ))
         }
       </ul>
+    </div>
+  </div>
+
+  <div class="panel-pop" data-panel="shuoshuo" aria-hidden="true">
+    <div class="panel-pop__inner">
+      <button class="panel-pop__close" type="button" data-close-panel aria-label="关闭说说">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18" stroke-linecap="round" /></svg>
+      </button>
+      <p class="panel-pop__title">说说</p>
+      <ul class="shuo">
+        {
+          shuoshuo.map((item) => (
+            <li class="shuo__item">
+              <span class="shuo__date">{item.date}</span>
+              <p class="shuo__text">{item.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel-pop" data-panel="fortune" aria-hidden="true" data-fortunes={JSON.stringify(fortune.items)}>
+    <div class="panel-pop__inner">
+      <button class="panel-pop__close" type="button" data-close-panel aria-label="关闭占卜">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18" stroke-linecap="round" /></svg>
+      </button>
+      <p class="panel-pop__title">每日占卜</p>
+      <button class="fortune" type="button" data-fortune-draw>
+        <span class="fortune__date" data-fortune-date></span>
+        <span class="fortune__level" data-fortune-level>？</span>
+        <span class="fortune__hint" data-fortune-hint>点一下，抽今天的签</span>
+      </button>
+      <p class="fortune__text" data-fortune-text>一天一签，明天再来。</p>
     </div>
   </div>
 
@@ -97,7 +131,7 @@ import { withBase } from '../lib/paths';
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 7h14M5 12h9M5 17h6" stroke-linecap="round" /></svg>
     </button>
 
-    <button class="player-bar__list" type="button" data-toggle-playlist aria-label="播放列表">
+    <button class="player-bar__list" type="button" data-toggle-playlist data-open-panel="playlist" aria-label="播放列表">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h11M4 18h7" stroke-linecap="round" /></svg>
     </button>
 

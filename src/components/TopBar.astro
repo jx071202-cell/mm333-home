@@ -10,7 +10,15 @@ import { nav, site } from '../data/site';
     </a>
 
     <nav class="topbar__nav" aria-label="页面导航">
-      {nav.map((item) => <a href={`#${item.id}`} data-nav-link={item.id}>{item.label}</a>)}
+      {
+        nav.map((item) =>
+          item.panel ? (
+            <button class="topbar__nav-btn" type="button" data-open-panel={item.panel}>{item.label}</button>
+          ) : (
+            <a href={`#${item.id}`} data-nav-link={item.id}>{item.label}</a>
+          )
+        )
+      }
     </nav>
 
     <div class="topbar__actions">

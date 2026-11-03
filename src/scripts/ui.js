@@ -9,6 +9,8 @@ export function initUI() {
   initCopy();
   initBackdropScene();
   initChimes();
+  initPanels();
+  initFortune();
   initPlayer();
 }
 
@@ -756,30 +758,6 @@ function initPlayer() {
     if (event.key === 'Escape') setFoliaOpen(false);
   });
 
-  const pop = document.querySelector('[data-playlist-pop]');
-  const listBtn = document.querySelector('[data-toggle-playlist]');
-  if (pop && listBtn) {
-    const setOpen = (open) => {
-      pop.classList.toggle('is-open', open);
-      pop.setAttribute('aria-hidden', String(!open));
-      listBtn.setAttribute('aria-expanded', String(open));
-    };
-    listBtn.addEventListener('click', (event) => {
-      event.stopPropagation();
-      setOpen(!pop.classList.contains('is-open'));
-    });
-    document.querySelector('[data-close-playlist]')?.addEventListener('click', (event) => {
-      event.stopPropagation();
-      setOpen(false);
-    });
-    document.addEventListener('click', (event) => {
-      if (!pop.contains(event.target) && !listBtn.contains(event.target)) setOpen(false);
-    });
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') setOpen(false);
-    });
-  }
-
   const first = songs[0];
   if (first) {
     if (els.cover && first.cover) els.cover.src = first.cover;
@@ -791,6 +769,137 @@ function initPlayer() {
     if (els.foliaSub) els.foliaSub.textContent = first.meta;
   }
   updatePlayState();
+}
+
+function initPanels() {
+  const panels = [...document.querySelectorAll('[data-panel]')];
+  if (!panels.length) return;
+
+  const closeAll = () => {
+    panels.forEach((panel) => {
+      panel.classList.remove('is-open');
+      panel.setAttribute('aria-hidden', 'true');
+    });
+  };
+
+  const open = (name) => {
+    const target = panels.find((panel) => panel.dataset.panel === name);
+    if (!target) return;
+    panels.forEach((panel) => {
+      const active = panel === target;
+      panel.classList.toggle('is-open', active);
+      panel.setAttribute('aria-hidden', String(!active));
+    });
+    target.dispatchEvent(new CustomEvent('panelopen'));
+  };
+
+  document.querySelectorAll('[data-open-panel]').forEach((btn) => {
+    btn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      open(btn.dataset.openPanel);
+    });
+  });
+
+  document.querySelectorAll('[data-close-panel]').forEach((btn) => {
+    btn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      closeAll();
+    });
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('[data-panel], [data-open-panel]')) closeAll();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeAll();
+  });
+}
+
+function initFortune() {
+  const panel = document.querySelector('[data-panel="fortune"]');
+  if (!panel) return;
+  const draw = panel.querySelector('[data-fortune-draw]');
+  const levelEl = panel.querySelector('[data-fortune-level]');
+  const textEl = panel.querySelector('[data-fortune-text]');
+  const hintEl = panel.querySelector('[data-fortune-hint]');
+  const dateEl = panel.querySelector('[data-fortune-date]');
+  let items = [];
+  try {
+    items = JSON.parse(panel.dataset.fortunes || '[]');
+  } catch (e) {
+    items = [];
+  }
+  if (!draw || !items.length) return;
+
+  const today = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+
+  const keyFor = (day) => `mm333-fortune:${day}`;
+
+  const hash = (str) => {
+    let h = 0;
+    for (let i = 0; i < str.length; i += 1) h = (h * 31 + str.charCodeAt(i)) % 100000;
+    return h;
+  };
+
+  const setDate = (day) => {
+    if (dateEl) dateEl.textContent = day.replaceAll('-', ' / ');
+  };
+
+  const reveal = (index, day) => {
+    const item = items[index];
+    if (!item) return;
+    draw.classList.remove('is-revealed');
+    void draw.offsetWidth;
+    if (levelEl) levelEl.textContent = item.level;
+    if (textEl) textEl.textContent = item.text;
+    if (hintEl) hintEl.textContent = '今日已抽 · 明天再来';
+    setDate(day);
+    draw.classList.add('is-revealed');
+  };
+
+  const stored = () => {
+    const day = today();
+    try {
+      const raw = window.localStorage.getItem(keyFor(day));
+      if (raw === null) return null;
+      const index = Number(raw);
+      return Number.isFinite(index) ? { day, index } : null;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const drawNow = () => {
+    const day = today();
+    const current = stored();
+    if (current) {
+      reveal(current.index, day);
+      return;
+    }
+    const index = hash(day) % items.length;
+    try {
+      window.localStorage.setItem(keyFor(day), String(index));
+    } catch (e) {}
+    reveal(index, day);
+  };
+
+  draw.addEventListener('click', drawNow);
+
+  panel.addEventListener('panelopen', () => {
+    const current = stored();
+    if (current) {
+      reveal(current.index, current.day);
+      return;
+    }
+    if (levelEl) levelEl.textContent = '？';
+    if (textEl) textEl.textContent = '一天一签，明天再来。';
+    if (hintEl) hintEl.textContent = '点一下，抽今天的签';
+    setDate(today());
+  });
 }
 
 function initChimes() {

@@ -37,9 +37,29 @@ export const hero = {
 };
 
 export const nav = [
-  { id: 'top', label: '首页' },
-  { id: 'songs', label: '我的歌单' },
+  { id: 'top', label: '首页', panel: null },
+  { id: 'songs', label: '我的歌单', panel: 'playlist' },
+  { id: 'shuoshuo', label: '说说', panel: 'shuoshuo' },
+  { id: 'fortune', label: '每日占卜', panel: 'fortune' },
 ];
+
+export const shuoshuo = [
+  { date: '2026-11-03', text: '风铃今天自己响了好几次，像是有谁路过。' },
+  { date: '2026-11-01', text: '雨天不出门，循环《浴室》一整晚。' },
+  { date: '2026-10-30', text: '把屋顶那场日出设成了桌面，看着就安静。' },
+];
+
+export const fortune = {
+  items: [
+    { level: '大吉', text: '今天适合听一首很久没放的歌，会想起一个人。' },
+    { level: '中吉', text: '会有一件小事顺起来，别急着否定自己。' },
+    { level: '小吉', text: '适合把想说没说的话写下来，不一定要发出去。' },
+    { level: '吉', text: '陌生人的一句客气话，会让你开心一下午。' },
+    { level: '末吉', text: '晚点再决定。今天的天气比你的心情更值得看。' },
+    { level: '平', text: '普通的一天，适合把歌单往下翻一页。' },
+    { level: '凶', text: '别在今天做大决定，先听完这一首。' },
+  ],
+};
 
 export const contacts = {
   qq: '2621636916',
