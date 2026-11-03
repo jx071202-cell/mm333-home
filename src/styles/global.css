@@ -4106,3 +4106,188 @@ body.folia-open {
     padding: 1rem 1.05rem;
   }
 }
+
+.shuo-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-bottom: 1.8rem;
+  padding: clamp(0.9rem, 2.4vw, 1.3rem);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 240, 220, 0.18);
+  background: rgba(13, 10, 15, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.shuo-editor__title,
+.shuo-editor__text,
+.shuo-token__input {
+  width: 100%;
+  border: 1px solid rgba(255, 240, 220, 0.18);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #f6ecdf;
+  font: inherit;
+  font-size: 0.92rem;
+  padding: 0.55rem 0.8rem;
+  outline: none;
+  transition: border-color 0.25s, background 0.25s;
+}
+
+.shuo-editor__title::placeholder,
+.shuo-editor__text::placeholder,
+.shuo-token__input::placeholder {
+  color: rgba(255, 236, 212, 0.35);
+}
+
+.shuo-editor__title:focus,
+.shuo-editor__text:focus,
+.shuo-token__input:focus {
+  border-color: rgba(255, 158, 192, 0.6);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.shuo-editor__text {
+  min-height: 96px;
+  resize: vertical;
+  line-height: 1.75;
+}
+
+.shuo-editor__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.shuo-editor__publish {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.15rem;
+  border-radius: 999px;
+  border: 0;
+  background: linear-gradient(160deg, #ffd0df, #ff9ec0 62%, #ff7fae);
+  color: #2a1119;
+  font-family: inherit;
+  font-size: 0.84rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: transform 0.25s, filter 0.25s;
+}
+
+.shuo-editor__publish svg {
+  width: 14px;
+  height: 14px;
+}
+
+.shuo-editor__publish:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.shuo-editor__ghost {
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 240, 220, 0.22);
+  background: transparent;
+  color: rgba(255, 240, 220, 0.75);
+  font-family: inherit;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: color 0.25s, border-color 0.25s;
+}
+
+.shuo-editor__ghost:hover {
+  color: #ffd7e4;
+  border-color: rgba(255, 158, 192, 0.6);
+}
+
+.shuo-editor__ghost.is-connected {
+  color: #b9f0c9;
+  border-color: rgba(120, 220, 160, 0.5);
+}
+
+.shuo-editor__status {
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  color: rgba(255, 236, 212, 0.55);
+}
+
+.shuo-editor__status[data-tone='ok'] {
+  color: #b9f0c9;
+}
+
+.shuo-editor__status[data-tone='warn'] {
+  color: #ffb3b3;
+}
+
+.shuo-token {
+  padding-top: 0.4rem;
+  border-top: 1px dashed rgba(255, 240, 220, 0.15);
+}
+
+.shuo-token__hint {
+  margin: 0.4rem 0 0.6rem;
+  font-size: 0.74rem;
+  line-height: 1.7;
+  color: rgba(255, 236, 212, 0.55);
+}
+
+.shuo-token__hint a {
+  color: #ffd7e4;
+}
+
+.shuo-token__hint code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  padding: 0.1em 0.3em;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.shuo-token__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.shuo-token__input {
+  flex: 1 1 220px;
+}
+
+.shuo-entry__badge {
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 158, 192, 0.4);
+  color: rgba(255, 215, 228, 0.85);
+}
+
+.shuo-entry__delete {
+  margin-left: auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 240, 220, 0.2);
+  background: transparent;
+  color: rgba(255, 240, 220, 0.6);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: color 0.25s, border-color 0.25s;
+}
+
+.shuo-entry__delete:hover {
+  color: #ffb3b3;
+  border-color: rgba(255, 179, 179, 0.6);
+}
+
+.shuo-entry__head {
+  flex-wrap: wrap;
+}
