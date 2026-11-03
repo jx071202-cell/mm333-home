@@ -1,26 +1,32 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { github } from '../../data/site';
+import { github, hero } from '../../data/site';
+import { withBase } from '../../lib/paths';
 
 const writeUrl = `https://github.com/${github.repo}/issues/new`;
 ---
 <BaseLayout title="说说">
   <section class="shuo-page">
     <div class="shuo-page__inner">
-      <header class="shuo-page__head">
-        <p class="shuo-page__kicker">DAILY NOTES</p>
-        <h1 class="shuo-page__title">说说</h1>
-        <p class="shuo-page__sub">每天的一点小事，想到就写。</p>
+      <header class="shuo-hero">
+        <button class="shuo-hero__pic" type="button" data-shuo-poke aria-label="戳一下插画">
+          <img src={withBase('/images/shuo-hero.jpg')} alt="说说页插画" width="640" height="640" />
+          <span class="shuo-hero__sparkles" data-shuo-sparkles aria-hidden="true"></span>
+        </button>
+        <div class="shuo-hero__text">
+          <h1 class="shuo-page__title">说说</h1>
+          <p class="shuo-page__sub">记录一些日常心情和一些碎碎念</p>
+          <p class="shuo-hero__pokes">已经戳了 <span data-shuo-poke-count>0</span> 下</p>
+        </div>
       </header>
 
+      <p class="shuo-year" data-shuo-year>2026</p>
+
       <form class="shuo-editor" data-shuo-editor>
-        <input class="shuo-editor__title" data-shuo-title maxlength="80" placeholder="标题（可不填）" />
-        <textarea class="shuo-editor__text" data-shuo-text rows="4" placeholder="今天发生的小事…支持换行、**加粗**、[链接](url)"></textarea>
+        <textarea class="shuo-editor__text" data-shuo-text rows="3" placeholder="今天的心情、路上的小事…写在这里"></textarea>
         <div class="shuo-editor__row">
-          <button class="shuo-editor__publish" type="submit">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12 20 4l-6 16-3-7-7-1Z" stroke-linejoin="round" /></svg>
-            发布
-          </button>
+          <input class="shuo-editor__title" data-shuo-title maxlength="60" placeholder="标题（可不填）" />
+          <button class="shuo-editor__publish" type="submit">发布</button>
           <button class="shuo-editor__ghost" type="button" data-shuo-settings aria-expanded="false">连接 GitHub</button>
           <span class="shuo-editor__status" data-shuo-status></span>
         </div>
@@ -40,7 +46,12 @@ const writeUrl = `https://github.com/${github.repo}/issues/new`;
         </div>
       </form>
 
-      <div class="shuo-feed" data-shuo-feed data-repo={github.repo}>
+      <div
+        class="shuo-feed"
+        data-shuo-feed
+        data-repo={github.repo}
+        data-avatar={hero.avatar}
+      >
         <p class="shuo-feed__status" data-shuo-status-feed>正在加载…</p>
       </div>
 
@@ -54,8 +65,10 @@ const writeUrl = `https://github.com/${github.repo}/issues/new`;
   <script>
     const feed = document.querySelector('[data-shuo-feed]');
     const form = document.querySelector('[data-shuo-editor]');
+
     if (feed && form) {
       const repo = feed.dataset.repo;
+      const defaultAvatar = feed.dataset.avatar || '';
       const statusEl = form.querySelector('[data-shuo-status]');
       const feedStatus = feed.querySelector('[data-shuo-status-feed]');
       const titleInput = form.querySelector('[data-shuo-title]');
@@ -118,16 +131,17 @@ const writeUrl = `https://github.com/${github.repo}/issues/new`;
       const formatDate = (value) => {
         const d = new Date(value);
         if (Number.isNaN(d.getTime())) return '';
-        const y = d.getFullYear();
         const m = String(d.getMonth() + 1).padStart(2, '0');
         const day = String(d.getDate()).padStart(2, '0');
         const h = String(d.getHours()).padStart(2, '0');
         const min = String(d.getMinutes()).padStart(2, '0');
-        return `${y}.${m}.${day} ${h}:${min}`;
+        return `${m}月${day}日 ${h}:${min}`;
       };
 
       const entryHtml = (entry, options = {}) => {
-        const title = entry.title ? `<span class="shuo-entry__title">${escapeHtml(entry.title)}</span>` : '';
+        const author = escapeHtml(entry.author || 'mm333');
+        const avatar = escapeHtml(entry.avatar || defaultAvatar);
+        const title = entry.title ? `<p class="shuo-entry__title">${escapeHtml(entry.title)}</p>` : '';
         const badge = options.local ? '<span class="shuo-entry__badge">本地</span>' : '';
         const del = options.local
           ? `<button class="shuo-entry__delete" type="button" data-delete-entry="${escapeHtml(entry.id)}" aria-label="删除这条">×</button>`
@@ -135,9 +149,12 @@ const writeUrl = `https://github.com/${github.repo}/issues/new`;
         return `
           <article class="shuo-entry">
             <div class="shuo-entry__head">
-              <time class="shuo-entry__date">${formatDate(entry.created_at)}</time>
-              ${title}${badge}${del}
+              <img class="shuo-entry__avatar" src="${avatar}" alt="" loading="lazy" />
+              <span class="shuo-entry__name">${author}</span>
+              ${badge}${del}
             </div>
+            <p class="shuo-entry__date">${formatDate(entry.created_at)}</p>
+            ${title}
             <div class="shuo-entry__body">${renderBody(entry.body || '')}</div>
           </article>
         `;
@@ -153,7 +170,7 @@ const writeUrl = `https://github.com/${github.repo}/issues/new`;
         ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         if (!all.length) {
-          if (feedStatus) feedStatus.textContent = '还没有说说，写下今天的第一条吧。';
+          if (feedStatus) feedStatus.textContent = '还没有说说，写下第一条吧。';
           feed.querySelectorAll('.shuo-list').forEach((el) => el.remove());
           return;
         }
@@ -195,7 +212,13 @@ const writeUrl = `https://github.com/${github.repo}/issues/new`;
           });
           if (!response.ok) throw new Error(String(response.status));
           const issues = await response.json();
-          remoteEntries = issues.filter((issue) => !issue.pull_request);
+          remoteEntries = issues
+            .filter((issue) => !issue.pull_request)
+            .map((issue) => ({
+              ...issue,
+              author: issue.user?.login || 'mm333',
+              avatar: issue.user?.avatar_url || defaultAvatar,
+            }));
         } catch (e) {
           remoteEntries = [];
         }
@@ -210,14 +233,18 @@ const writeUrl = `https://github.com/${github.repo}/issues/new`;
           textInput.focus();
           return;
         }
-        const title = titleInput.value.trim() || formatDate(new Date());
+        const title = titleInput.value.trim();
         const token = readToken();
         setStatus(token ? '正在发布…' : '正在保存…');
 
         if (token) {
           try {
-            const issue = await createIssue(title, body, token);
-            remoteEntries.unshift(issue);
+            const issue = await createIssue(title || formatDate(new Date()), body, token);
+            remoteEntries.unshift({
+              ...issue,
+              author: issue.user?.login || 'mm333',
+              avatar: issue.user?.avatar_url || defaultAvatar,
+            });
             textInput.value = '';
             titleInput.value = '';
             render();
@@ -232,7 +259,7 @@ const writeUrl = `https://github.com/${github.repo}/issues/new`;
         const local = readLocal();
         local.unshift({
           id: `local-${Date.now()}`,
-          title: titleInput.value.trim(),
+          title,
           body,
           created_at: new Date().toISOString(),
         });
@@ -285,6 +312,56 @@ const writeUrl = `https://github.com/${github.repo}/issues/new`;
 
       syncTokenUi();
       loadRemote();
+    }
+
+    const yearEl = document.querySelector('[data-shuo-year]');
+    if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
+    const poke = document.querySelector('[data-shuo-poke]');
+    const sparkles = document.querySelector('[data-shuo-sparkles]');
+    const pokeCountEl = document.querySelector('[data-shuo-poke-count]');
+    if (poke) {
+      const POKE_KEY = 'mm333-shuo-pokes';
+      const readPokes = () => {
+        try {
+          return Number(window.localStorage.getItem(POKE_KEY) || '0') || 0;
+        } catch (e) {
+          return 0;
+        }
+      };
+      let count = readPokes();
+      if (pokeCountEl) pokeCountEl.textContent = String(count);
+
+      const glyphs = ['✦', '✧', '♥', '❀', '✺', '★'];
+
+      poke.addEventListener('click', () => {
+        count += 1;
+        if (pokeCountEl) pokeCountEl.textContent = String(count);
+        try {
+          window.localStorage.setItem(POKE_KEY, String(count));
+        } catch (e) {}
+
+        poke.classList.remove('is-poked');
+        void poke.offsetWidth;
+        poke.classList.add('is-poked');
+        window.setTimeout(() => poke.classList.remove('is-poked'), 620);
+
+        if (!sparkles) return;
+        const amount = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 6;
+        for (let i = 0; i < amount; i += 1) {
+          const glyph = document.createElement('span');
+          glyph.className = 'shuo-hero__sparkle';
+          glyph.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+          const angle = Math.random() * Math.PI * 2;
+          const distance = 40 + Math.random() * 90;
+          glyph.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
+          glyph.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
+          glyph.style.left = `${45 + Math.random() * 20 - 10}%`;
+          glyph.style.top = `${45 + Math.random() * 20 - 10}%`;
+          sparkles.appendChild(glyph);
+          window.setTimeout(() => glyph.remove(), 900);
+        }
+      });
     }
   </script>
 </BaseLayout>

@@ -976,6 +976,8 @@ function initChimes() {
     noise.start(t0);
   };
 
+  window.__chimeStrike = strike;
+
   const entries = chimes.map((el) => ({ el, note: Number(el.dataset.note) || 90 }));
 
   const ring = (entry) => {
